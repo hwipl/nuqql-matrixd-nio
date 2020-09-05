@@ -34,7 +34,7 @@ class BackendServer:
     def __init__(self) -> None:
         self.connections: Dict[int, BackendClient] = {}
         self.threads: Dict[int, Tuple[Thread, Event]] = {}
-        self.based = Based("matrixd", VERSION)
+        self.based = Based("matrixd-nio", VERSION)
 
     def start(self) -> None:
         """
