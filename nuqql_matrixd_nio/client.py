@@ -10,17 +10,18 @@ from typing import TYPE_CHECKING, List, Tuple
 from threading import Lock, Event
 from types import SimpleNamespace
 
-# matrixd import
-from nuqql_matrixd_nio.matrix import (MatrixClient, parse_account_user,
-                                      escape_name)
-
 # nuqq-based imports
 from nuqql_based.message import Message
 from nuqql_based.callback import Callback
 
+# matrixd import
+from nuqql_matrixd_nio.matrix import (MatrixClient, parse_account_user,
+                                      escape_name)
+
 if TYPE_CHECKING:   # imports for typing
+    # pylint: disable=ungrouped-imports
     # TODO: move Event here?
-    from nuqql_based.account import Account
+    from nuqql_based.account import Account  # noqa
 
 
 class BackendClient:
