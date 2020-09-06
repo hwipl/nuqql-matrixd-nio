@@ -12,7 +12,7 @@ class MatrixClient:
     Matrix client class
     """
 
-    def __init__(self, url: str, message_handler: Callable,
+    def __init__(self, _url: str, message_handler: Callable,
                  membership_handler: Callable) -> None:
         self.token = ""
         self.status = "offline"
@@ -24,7 +24,7 @@ class MatrixClient:
         self.message_handler = message_handler
         self.membership_handler = membership_handler
 
-    def connect(self, username: str, password: str, sync_token: str) -> str:
+    def connect(self, _username: str, _password: str, _sync_token: str) -> str:
         """
         Connect to matrix server
         """
@@ -36,14 +36,16 @@ class MatrixClient:
         Stop client
         """
 
-    def sync_token(self) -> str:
+    @staticmethod
+    def sync_token() -> str:
         """
         Get sync token of client connection
         """
 
         return ""
 
-    def get_rooms(self) -> Dict:
+    @staticmethod
+    def get_rooms() -> Dict:
         """
         Get list of rooms
         """
@@ -65,7 +67,8 @@ class MatrixClient:
 
         return self.room_invites
 
-    def get_display_name(self, user: str) -> str:
+    @staticmethod
+    def get_display_name(user: str) -> str:
         """
         Get the display name of user
         """
@@ -77,28 +80,32 @@ class MatrixClient:
         Send msg to dest_room
         """
 
-    def create_room(self, room_name: str) -> str:
+    @staticmethod
+    def create_room(_room_name: str) -> str:
         """
         Create chat room that is identified by room_name
         """
 
         return ""
 
-    def join_room(self, room_name: str) -> str:
+    @staticmethod
+    def join_room(_room_name: str) -> str:
         """
         Join chat room that is identified by room_name
         """
 
         return ""
 
-    def part_room(self, room_name: str) -> str:
+    @staticmethod
+    def part_room(_room_name: str) -> str:
         """
         Leave chat room identified by room_name
         """
 
         return ""
 
-    def list_room_users(self, room_name: str) -> List[Tuple[str, str, str]]:
+    @staticmethod
+    def list_room_users(_room_name: str) -> List[Tuple[str, str, str]]:
         """
         List users in room identified by room_name
         """
@@ -106,7 +113,8 @@ class MatrixClient:
         user_list = []
         return user_list
 
-    def invite_room(self, room_name: str, user_id: str) -> str:
+    @staticmethod
+    def invite_room(_room_name: str, _user_id: str) -> str:
         """
         Invite user with user_id to room with room_name
         """
