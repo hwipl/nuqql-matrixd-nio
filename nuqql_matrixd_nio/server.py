@@ -9,16 +9,17 @@ import re
 from typing import TYPE_CHECKING, Dict, Optional, Tuple
 from threading import Thread, Lock, Event
 
-# matrixd imports
-from nuqql_matrixd_nio.client import BackendClient
-from nuqql_matrixd_nio.matrix import unescape_name
-
 # nuqq-based imports
 from nuqql_based.based import Based
 from nuqql_based.callback import Callback
 
+# matrixd imports
+from nuqql_matrixd_nio.client import BackendClient
+from nuqql_matrixd_nio.matrix import unescape_name
+
 if TYPE_CHECKING:   # imports for typing
-    from nuqql_based.account import Account
+    # pylint: disable=ungrouped-imports
+    from nuqql_based.account import Account  # noqa
 
 
 # matrixd version
