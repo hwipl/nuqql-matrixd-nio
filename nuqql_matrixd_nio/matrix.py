@@ -4,7 +4,7 @@ matrix specific stuff
 
 import urllib.parse
 
-from typing import Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple
 
 
 class MatrixClient:
@@ -50,7 +50,7 @@ class MatrixClient:
         Get list of rooms
         """
 
-        rooms = {}
+        rooms: Dict[Any, Any] = {}
         return rooms
 
     def get_invites(self) -> Dict:
@@ -110,7 +110,7 @@ class MatrixClient:
         List users in room identified by room_name
         """
 
-        user_list = []
+        user_list: List[Any] = []
         return user_list
 
     @staticmethod
