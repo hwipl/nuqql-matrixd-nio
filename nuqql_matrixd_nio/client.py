@@ -3,7 +3,6 @@ matrixd backend client
 """
 
 import asyncio
-import time
 import stat
 import os
 
@@ -58,21 +57,22 @@ class BackendClient:
         self.lock = lock
         self.queue: List[Tuple[Callback, Tuple]] = []
 
-    def connect(self, sync_token) -> None:
+    async def connect(self, sync_token) -> None:
         """
         Connect to server
         """
 
         # parse user to get url and username, then connect
-        self.client.connect(self.account.password, sync_token)
+        status = await self.client.connect(self.account.password, sync_token)
 
-    def start(self, running: Event) -> None:
+        if status == "online":
+            # start sync loop of matrix client
+            asyncio.create_task(self.client.client.sync_forever(timeout=30000))
+
+    async def start(self, running: Event) -> None:
         """
         Start the client
         """
-
-        # start sync loop of matrix client
-        asyncio.create_task(self.client.client.sync_forever(timeout=30000))
 
         # enter main loop, and keep running until "running" is set to false
         # by the KeyboardInterrupt
@@ -83,7 +83,7 @@ class BackendClient:
                 sync_token = self.load_sync_token()
 
                 # start client connection
-                self.connect(sync_token)
+                await self.connect(sync_token)
 
                 # skip other parts until the client is really online
                 continue
@@ -94,7 +94,7 @@ class BackendClient:
             self.update_buddies()
             sync_token = self.update_sync_token(sync_token,
                                                 self.client.sync_token())
-            time.sleep(0.1)
+            await asyncio.sleep(0.1)
 
         # stop the listener thread in the matrix client
         self.client.stop()

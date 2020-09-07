@@ -148,7 +148,7 @@ class BackendServer:
         ready.set()
 
         # start client; this returns when client is stopped
-        client.start(running)
+        asyncio.run(client.start(running))
 
     def add_account(self, account: Optional["Account"], _cmd: Callback,
                     _params: Tuple) -> str:
