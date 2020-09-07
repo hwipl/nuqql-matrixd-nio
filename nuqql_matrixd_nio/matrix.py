@@ -6,14 +6,18 @@ import urllib.parse
 
 from typing import Any, Callable, Dict, List, Tuple
 
+from nio import AsyncClient, LoginResponse, MatrixRoom, RoomMessageText
+
 
 class MatrixClient:
     """
     Matrix client class
     """
 
-    def __init__(self, _url: str, message_handler: Callable,
+    def __init__(self, url: str, username: str, message_handler: Callable,
                  membership_handler: Callable) -> None:
+        self.client = AsyncClient(url, username)
+        self.client.add_event_callback(self.message_callback, RoomMessageText)
         self.token = ""
         self.status = "offline"
 
@@ -24,11 +28,25 @@ class MatrixClient:
         self.message_handler = message_handler
         self.membership_handler = membership_handler
 
-    def connect(self, _username: str, _password: str, _sync_token: str) -> str:
+    async def message_callback(self, room: MatrixRoom,
+                               event: RoomMessageText) -> None:
+        """
+        Message handler
+        """
+
+        # save timestamp and message in messages list and history
+        tstamp = str(int(event.server_timestamp/1000))
+        self.message_handler(tstamp, room.user_name(event.sender),
+                             room.machine_name,
+                             event.body)
+
+    async def connect(self, password: str, _sync_token: str) -> str:
         """
         Connect to matrix server
         """
-
+        resp = await self.client.login(password)
+        if isinstance(resp, LoginResponse):
+            self.status = "online"
         return self.status  # remove return?
 
     def stop(self) -> None:

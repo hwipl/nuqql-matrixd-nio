@@ -2,6 +2,7 @@
 matrixd backend client
 """
 
+import asyncio
 import time
 import stat
 import os
@@ -36,11 +37,12 @@ class BackendClient:
         # parse user to get url and username
         url, user, domain = parse_account_user(account.user)
 
-        # initialize matrix client connection
-        self.client = MatrixClient(url, self._message, self._membership_event)
-
         # construct matrix user name with user and domain name
         self.user = "@{}:{}".format(user, domain)
+
+        # initialize matrix client connection
+        self.client = MatrixClient(url, self.user, self._message,
+                                   self._membership_event)
 
         # sync token and connection config
         self.settings = SimpleNamespace(
@@ -62,13 +64,15 @@ class BackendClient:
         """
 
         # parse user to get url and username, then connect
-        _url, username, _domain = parse_account_user(self.account.user)
-        self.client.connect(username, self.account.password, sync_token)
+        self.client.connect(self.account.password, sync_token)
 
     def start(self, running: Event) -> None:
         """
         Start the client
         """
+
+        # start sync loop of matrix client
+        asyncio.create_task(self.client.client.sync_forever(timeout=30000))
 
         # enter main loop, and keep running until "running" is set to false
         # by the KeyboardInterrupt
