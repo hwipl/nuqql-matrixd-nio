@@ -51,7 +51,8 @@ class MatrixClient:
 
             # start sync task
             asyncio.create_task(self.client.sync_forever(timeout=30000,
-                                                         since=sync_token))
+                                                         since=sync_token,
+                                                         full_state=True))
 
         return self.status  # remove return?
 
