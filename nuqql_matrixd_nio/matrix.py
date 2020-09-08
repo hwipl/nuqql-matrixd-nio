@@ -68,14 +68,12 @@ class MatrixClient:
 
         return self.client.next_batch
 
-    @staticmethod
-    def get_rooms() -> Dict:
+    def get_rooms(self) -> Dict:
         """
         Get list of rooms
         """
 
-        rooms: Dict[Any, Any] = {}
-        return rooms
+        return self.client.rooms
 
     def get_invites(self) -> Dict:
         """
