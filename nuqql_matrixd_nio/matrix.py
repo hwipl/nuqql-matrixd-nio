@@ -41,7 +41,7 @@ class MatrixClient:
                              room.machine_name,
                              event.body)
 
-    async def connect(self, password: str, _sync_token: str) -> str:
+    async def connect(self, password: str, sync_token: str) -> str:
         """
         Connect to matrix server
         """
@@ -50,7 +50,8 @@ class MatrixClient:
             self.status = "online"
 
             # start sync task
-            asyncio.create_task(self.client.sync_forever(timeout=30000))
+            asyncio.create_task(self.client.sync_forever(timeout=30000,
+                                                         since=sync_token))
 
         return self.status  # remove return?
 
@@ -59,13 +60,12 @@ class MatrixClient:
         Stop client
         """
 
-    @staticmethod
-    def sync_token() -> str:
+    def sync_token(self) -> str:
         """
         Get sync token of client connection
         """
 
-        return ""
+        return self.client.next_batch
 
     @staticmethod
     def get_rooms() -> Dict:
