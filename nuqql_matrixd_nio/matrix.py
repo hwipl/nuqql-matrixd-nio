@@ -80,14 +80,7 @@ class MatrixClient:
         Get room invites
         """
 
-        # cleanup old invites
-        rooms = self.get_rooms()
-        for room in rooms.values():
-            if room.room_id in self.room_invites:
-                # seems like we are in the room now, remove invite
-                del self.room_invites[room.room_id]
-
-        return self.room_invites
+        return self.client.invited_rooms
 
     @staticmethod
     def get_display_name(user: str) -> str:
