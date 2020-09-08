@@ -22,9 +22,6 @@ class MatrixClient:
         self.token = ""
         self.status = "offline"
 
-        # separate data structure for managing room invites
-        self.room_invites: Dict[str, Tuple[str, str, str, str, str]] = {}
-
         # handlers
         self.message_handler = message_handler
         self.membership_handler = membership_handler
