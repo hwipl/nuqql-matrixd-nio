@@ -2,6 +2,7 @@
 matrix specific stuff
 """
 
+import asyncio
 import urllib.parse
 
 from typing import Any, Callable, Dict, List, Tuple
@@ -47,6 +48,10 @@ class MatrixClient:
         resp = await self.client.login(password)
         if isinstance(resp, LoginResponse):
             self.status = "online"
+
+            # start sync task
+            asyncio.create_task(self.client.sync_forever(timeout=30000))
+
         return self.status  # remove return?
 
     def stop(self) -> None:

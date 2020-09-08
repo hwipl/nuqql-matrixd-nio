@@ -62,12 +62,7 @@ class BackendClient:
         Connect to server
         """
 
-        # parse user to get url and username, then connect
-        status = await self.client.connect(self.account.password, sync_token)
-
-        if status == "online":
-            # start sync loop of matrix client
-            asyncio.create_task(self.client.client.sync_forever(timeout=30000))
+        await self.client.connect(self.account.password, sync_token)
 
     async def start(self, running: Event) -> None:
         """
