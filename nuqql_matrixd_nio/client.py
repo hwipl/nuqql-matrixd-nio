@@ -210,7 +210,7 @@ class BackendClient:
             if cmd == Callback.CHAT_PART:
                 await self._chat_part(params[0])
             if cmd == Callback.CHAT_USERS:
-                self._chat_users(params[0])
+                await self._chat_users(params[0])
             if cmd == Callback.CHAT_INVITE:
                 self._chat_invite(params[0], params[1])
 
@@ -283,12 +283,12 @@ class BackendClient:
         if error != "":
             self.account.receive_msg(Message.error(error))
 
-    def _chat_users(self, chat: str) -> None:
+    async def _chat_users(self, chat: str) -> None:
         """
         Get list of users in chat on account
         """
 
-        user_list = self.client.list_room_users(chat)
+        user_list = await self.client.list_room_users(chat)
         for user in user_list:
             user_id, user_name, user_status = user
             self.account.receive_msg(

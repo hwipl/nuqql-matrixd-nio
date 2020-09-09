@@ -6,11 +6,12 @@ import asyncio
 import logging
 import urllib.parse
 
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple
 
 from nio import (  # type: ignore
     AsyncClient,
     JoinError,
+    JoinedMembersResponse,
     LocalProtocolError,
     LoginResponse,
     MatrixRoom,
@@ -176,13 +177,26 @@ class MatrixClient:
             return f"room {room_name} not found"
         return resp
 
-    @staticmethod
-    def list_room_users(_room_name: str) -> List[Tuple[str, str, str]]:
+    async def list_room_users(self, room_name: str) -> List[Tuple[str, str,
+                                                                  str]]:
         """
         List users in room identified by room_name
         """
 
-        user_list: List[Any] = []
+        rooms = self.get_rooms()
+        user_list: List[Tuple[str, str, str]] = []
+        for room in rooms.values():
+            if unescape_name(room_name) == room.display_name or \
+               unescape_name(room_name) == room.room_id:
+                # list members
+                resp = await self.client.joined_members(room.room_id)
+                if not isinstance(resp, JoinedMembersResponse):
+                    return user_list
+                for member in resp.members:
+                    user_list.append((member.user_id,
+                                      escape_name(member.display_name),
+                                      "join"))
+
         return user_list
 
     @staticmethod
