@@ -8,8 +8,15 @@ import urllib.parse
 
 from typing import Any, Callable, Dict, List, Tuple
 
-from nio import (AsyncClient, JoinError, LocalProtocolError, LoginResponse,
-                 MatrixRoom, RoomCreateError, RoomMessageText)
+from nio import (  # type: ignore
+    AsyncClient,
+    JoinError,
+    LocalProtocolError,
+    LoginResponse,
+    MatrixRoom,
+    RoomCreateError,
+    RoomMessageText
+)
 
 
 class MatrixClient:
