@@ -49,20 +49,23 @@ class MatrixClient:
         self.message_handler(tstamp, event.sender, room.machine_name,
                              event.body)
 
-    async def connect(self, password: str, _sync_token: str) -> str:
+    async def connect(self, password: str, sync_token: str) -> str:
         """
         Connect to matrix server
         """
+
         resp = await self.client.login(password)
         if isinstance(resp, LoginResponse):
             self.status = "online"
 
             # start sync task
             sync_filter = {"room": {"timeline": {"limit": 0}}}
+            await self.client.sync(timeout=30000, full_state=True,
+                                   sync_filter=sync_filter)
             asyncio.create_task(self.client.sync_forever(
                 timeout=30000,
+                since=sync_token,
                 full_state=True,
-                first_sync_filter=sync_filter,
             ))
 
         return self.status  # remove return?
