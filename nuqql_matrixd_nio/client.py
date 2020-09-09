@@ -330,9 +330,8 @@ class BackendClient:
         # handle pending room invites as temporary buddies
         invites = self.client.get_invites()
         for invite in invites.values():
-            room_id, room_name, _sender, _sender_name, _tstamp = invite
             status = "GROUP_CHAT_INVITE"
-            buddy = (room_id, room_name, status)
+            buddy = (invite.room_id, invite.display_name, status)
             buddies.append(buddy)
 
         # update account's buddy list with buddies
