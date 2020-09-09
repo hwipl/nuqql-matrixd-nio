@@ -9,7 +9,7 @@ import urllib.parse
 from typing import Any, Callable, Dict, List, Tuple
 
 from nio import (AsyncClient, LocalProtocolError, LoginResponse, MatrixRoom,
-                 RoomMessageText)
+                 RoomCreateError, RoomMessageText)
 
 
 class MatrixClient:
@@ -112,12 +112,14 @@ class MatrixClient:
                     logging.error(error)
                     self.status = "offline"
 
-    @staticmethod
-    def create_room(_room_name: str) -> str:
+    async def create_room(self, room_name: str) -> str:
         """
         Create chat room that is identified by room_name
         """
 
+        resp = await self.client.room_create(name=room_name)
+        if isinstance(resp, RoomCreateError):
+            return str(resp)
         return ""
 
     @staticmethod

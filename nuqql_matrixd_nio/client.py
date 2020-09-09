@@ -255,12 +255,13 @@ class BackendClient:
                 self.account, room.room_id, escape_name(room.display_name),
                 self.user))
 
-    def _chat_create(self, name: str) -> None:
+    async def _chat_create(self, name: str) -> None:
         """
         Create a group chat room with name <name>
         """
 
-        error = self.client.create_room(name)
+        # TODO: check if this is really used and remove it?
+        error = await self.client.create_room(name)
         if error != "":
             self.account.receive_msg(Message.error(error))
 
