@@ -212,7 +212,7 @@ class BackendClient:
             if cmd == Callback.CHAT_USERS:
                 await self._chat_users(params[0])
             if cmd == Callback.CHAT_INVITE:
-                self._chat_invite(params[0], params[1])
+                await self._chat_invite(params[0], params[1])
 
     async def _send_message(self, message_tuple: Tuple) -> None:
         """
@@ -295,12 +295,12 @@ class BackendClient:
                 Message.chat_user(self.account, chat, user_id, user_name,
                                   user_status))
 
-    def _chat_invite(self, chat: str, user_id: str) -> None:
+    async def _chat_invite(self, chat: str, user_id: str) -> None:
         """
         Invite user to chat
         """
 
-        error = self.client.invite_room(chat, user_id)
+        error = await self.client.invite_room(chat, user_id)
         if error != "":
             self.account.receive_msg(Message.error(error))
 

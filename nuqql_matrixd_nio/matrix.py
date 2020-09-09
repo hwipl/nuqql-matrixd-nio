@@ -16,6 +16,7 @@ from nio import (  # type: ignore
     LoginResponse,
     MatrixRoom,
     RoomCreateError,
+    RoomInviteError,
     RoomLeaveError,
     RoomMessageText
 )
@@ -199,12 +200,18 @@ class MatrixClient:
 
         return user_list
 
-    @staticmethod
-    def invite_room(_room_name: str, _user_id: str) -> str:
+    async def invite_room(self, room_name: str, user_id: str) -> str:
         """
         Invite user with user_id to room with room_name
         """
 
+        rooms = self.get_rooms()
+        for room in rooms.values():
+            if unescape_name(room_name) == room.display_name or \
+               unescape_name(room_name) == room.room_id:
+                resp = await self.client.room_invite(room.room_id, user_id)
+                if isinstance(resp, RoomInviteError):
+                    return str(resp)
         return ""
 
 
