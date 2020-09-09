@@ -34,8 +34,7 @@ class MatrixClient:
 
         # save timestamp and message in messages list and history
         tstamp = str(int(event.server_timestamp/1000))
-        self.message_handler(tstamp, room.user_name(event.sender),
-                             room.machine_name,
+        self.message_handler(tstamp, event.sender, room.machine_name,
                              event.body)
 
     async def connect(self, password: str, sync_token: str) -> str:
