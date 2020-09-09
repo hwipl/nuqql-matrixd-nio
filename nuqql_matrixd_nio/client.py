@@ -208,7 +208,7 @@ class BackendClient:
             if cmd == Callback.CHAT_JOIN:
                 await self._chat_join(params[0])
             if cmd == Callback.CHAT_PART:
-                self._chat_part(params[0])
+                await self._chat_part(params[0])
             if cmd == Callback.CHAT_USERS:
                 self._chat_users(params[0])
             if cmd == Callback.CHAT_INVITE:
@@ -274,12 +274,12 @@ class BackendClient:
         if error != "":
             self.account.receive_msg(Message.error(error))
 
-    def _chat_part(self, chat: str) -> None:
+    async def _chat_part(self, chat: str) -> None:
         """
         Leave chat on account
         """
 
-        error = self.client.part_room(chat)
+        error = await self.client.part_room(chat)
         if error != "":
             self.account.receive_msg(Message.error(error))
 

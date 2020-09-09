@@ -15,6 +15,7 @@ from nio import (  # type: ignore
     LoginResponse,
     MatrixRoom,
     RoomCreateError,
+    RoomLeaveError,
     RoomMessageText
 )
 
@@ -144,13 +145,36 @@ class MatrixClient:
             return str(resp)
         return ""
 
-    @staticmethod
-    def part_room(_room_name: str) -> str:
+    async def _part_room(self, rooms: Dict[str, MatrixRoom],
+                         room_name: str) -> str:
+        # if room_name is in the rooms dictionary, try to leave/reject it
+        for room in rooms.values():
+            if unescape_name(room_name) == room.display_name or \
+               unescape_name(room_name) == room.room_id:
+                # leave room
+                resp = await self.client.room_leave(room.room_id)
+                if isinstance(resp, RoomLeaveError):
+                    return str(resp)
+                return ""
+        return "NOT FOUND"
+
+    async def part_room(self, room_name: str) -> str:
         """
         Leave chat room identified by room_name
         """
 
-        return ""
+        # part an already joined room
+        rooms = self.get_rooms()
+        resp = await self._part_room(rooms, room_name)
+        if resp == "" or resp != "NOT FOUND":
+            return resp
+
+        # part a room we are invited to
+        rooms = self.get_invites()
+        resp = await self._part_room(rooms, room_name)
+        if resp == "NOT FOUND":
+            return f"room {room_name} not found"
+        return resp
 
     @staticmethod
     def list_room_users(_room_name: str) -> List[Tuple[str, str, str]]:
