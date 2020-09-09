@@ -8,8 +8,8 @@ import urllib.parse
 
 from typing import Any, Callable, Dict, List, Tuple
 
-from nio import (AsyncClient, LocalProtocolError, LoginResponse, MatrixRoom,
-                 RoomCreateError, RoomMessageText)
+from nio import (AsyncClient, JoinError, LocalProtocolError, LoginResponse,
+                 MatrixRoom, RoomCreateError, RoomMessageText)
 
 
 class MatrixClient:
@@ -122,12 +122,19 @@ class MatrixClient:
             return str(resp)
         return ""
 
-    @staticmethod
-    def join_room(_room_name: str) -> str:
+    async def join_room(self, room_name: str) -> str:
         """
         Join chat room that is identified by room_name
         """
 
+        room_name = unescape_name(room_name)
+        resp = await self.client.join(room_name)
+        if isinstance(resp, JoinError):
+            # joining an existing room failed.
+            # if chat is not a room id, try to create a new room
+            if not room_name.startswith("!") or ":" not in room_name:
+                return await self.create_room(room_name)
+            return str(resp)
         return ""
 
     @staticmethod
