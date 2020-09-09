@@ -15,9 +15,11 @@ from nio import (  # type: ignore
     LocalProtocolError,
     LoginResponse,
     MatrixRoom,
+    ProfileGetDisplayNameResponse,
     RoomCreateError,
     RoomInviteError,
     RoomLeaveError,
+    RoomMemberEvent,
     RoomMessageText
 )
 
@@ -31,6 +33,7 @@ class MatrixClient:
                  membership_handler: Callable) -> None:
         self.client = AsyncClient(url, username)
         self.client.add_event_callback(self.message_callback, RoomMessageText)
+        self.client.add_event_callback(self.member_callback, RoomMemberEvent)
         self.token = ""
         self.status = "offline"
 
@@ -48,6 +51,33 @@ class MatrixClient:
         tstamp = str(int(event.server_timestamp/1000))
         self.message_handler(tstamp, event.sender, room.machine_name,
                              event.body)
+
+    async def member_callback(self, room: MatrixRoom,
+                              event: RoomMemberEvent) -> None:
+        """
+        Room membership event handler
+        """
+
+        tstamp = str(int(event.server_timestamp/1000))
+
+        # set display name of user
+        display_name = room.user_name(event.sender)
+        if event.membership == "leave":
+            resp = await self.client.get_displayname(event.sender)
+            if isinstance(resp, ProfileGetDisplayNameResponse):
+                if resp.displayname:
+                    display_name = resp.displayname
+
+        # set invited user
+        invited_user = ""
+        if event.membership == "invite":
+            invited_user = event.content["displayname"]
+        if event.membership == "join":
+            invited_user = event.content["displayname"]
+
+        self.membership_handler(event.membership, tstamp, event.sender,
+                                display_name, room.room_id, room.display_name,
+                                invited_user)
 
     async def connect(self, password: str, sync_token: str) -> str:
         """
