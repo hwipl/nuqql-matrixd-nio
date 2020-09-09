@@ -85,7 +85,7 @@ class BackendClient:
 
             # send pending outgoing messages, update the (safe copy of the)
             # buddy list, update the sync token, then sleep a little bit
-            self.handle_queue()
+            await self.handle_queue()
             self.update_buddies()
             sync_token = self.update_sync_token(sync_token,
                                                 self.client.sync_token())
@@ -185,7 +185,7 @@ class BackendClient:
         self.queue.append((cmd, params))
         self.lock.release()
 
-    def handle_queue(self) -> None:
+    async def handle_queue(self) -> None:
         """
         Handle all queued commands
         """
@@ -198,7 +198,7 @@ class BackendClient:
 
         for cmd, params in queue:
             if cmd == Callback.SEND_MESSAGE:
-                self._send_message(params)
+                await self._send_message(params)
             if cmd == Callback.SET_STATUS:
                 self._set_status(params[0])
             if cmd == Callback.GET_STATUS:
@@ -214,7 +214,7 @@ class BackendClient:
             if cmd == Callback.CHAT_INVITE:
                 self._chat_invite(params[0], params[1])
 
-    def _send_message(self, message_tuple: Tuple) -> None:
+    async def _send_message(self, message_tuple: Tuple) -> None:
         """
         Send a single message
         """
@@ -226,7 +226,7 @@ class BackendClient:
 
         # create message from message tuple and send it
         dest, msg, html_msg, _mtype = message_tuple
-        self.client.send_message(dest, msg, html_msg)
+        await self.client.send_message(dest, msg, html_msg)
 
     def _set_status(self, status: str) -> None:
         """

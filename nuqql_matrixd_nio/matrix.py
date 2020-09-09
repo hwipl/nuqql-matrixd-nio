@@ -3,11 +3,13 @@ matrix specific stuff
 """
 
 import asyncio
+import logging
 import urllib.parse
 
 from typing import Any, Callable, Dict, List, Tuple
 
-from nio import AsyncClient, LoginResponse, MatrixRoom, RoomMessageText
+from nio import (AsyncClient, LocalProtocolError, LoginResponse, MatrixRoom,
+                 RoomMessageText)
 
 
 class MatrixClient:
@@ -86,10 +88,29 @@ class MatrixClient:
 
         return user
 
-    def send_message(self, dest_room: str, msg: str, html_msg: str) -> None:
+    async def send_message(self, dest_room: str, msg: str,
+                           html_msg: str) -> None:
         """
         Send msg to dest_room
         """
+
+        rooms = self.get_rooms()
+        for room in rooms.values():
+            if dest_room in (room.display_name, room.room_id):
+                try:
+                    await self.client.room_send(
+                        room_id=room.room_id,
+                        message_type="m.room.message",
+                        content={
+                            "msgtype": "m.text",
+                            "format": "org.matrix.custom.html",
+                            "formatted_body": html_msg,
+                            "body": msg,
+                        }
+                    )
+                except LocalProtocolError as error:
+                    logging.error(error)
+                    self.status = "offline"
 
     @staticmethod
     def create_room(_room_name: str) -> str:
