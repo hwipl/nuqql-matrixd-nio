@@ -4,6 +4,7 @@ matrix specific stuff
 
 import asyncio
 import logging
+import os
 import urllib.parse
 
 from typing import Callable, Dict, List, Tuple
@@ -33,6 +34,8 @@ class MatrixClient:
     def __init__(self, url: str, username: str, store_path: str,
                  message_handler: Callable,
                  membership_handler: Callable) -> None:
+        if not os.path.isdir(store_path):
+            os.mkdir(store_path)
         self.config = AsyncClientConfig(
             store_sync_tokens=True,
             encryption_enabled=True,
