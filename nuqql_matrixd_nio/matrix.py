@@ -3,6 +3,7 @@ matrix specific stuff
 """
 
 import asyncio
+import json
 import logging
 import os
 import urllib.parse
@@ -25,6 +26,8 @@ from nio import (  # type: ignore
     RoomMessageText
 )
 
+CREDENTIALS_FILE = "credentials.json"
+
 
 class MatrixClient:
     """
@@ -34,8 +37,10 @@ class MatrixClient:
     def __init__(self, url: str, username: str, store_path: str,
                  message_handler: Callable,
                  membership_handler: Callable) -> None:
+        self.url = url
         if not os.path.isdir(store_path):
             os.mkdir(store_path)
+        self.store_path = store_path
         config = AsyncClientConfig(
             store_sync_tokens=True,
             encryption_enabled=True,
@@ -90,15 +95,60 @@ class MatrixClient:
                                 display_name, room.room_id, room.display_name,
                                 invited_user)
 
+    def save_credentials(self, user_id: str, device_id: str,
+                         access_token: str) -> None:
+        """
+        save credentials like access token to disk for later logins
+        """
+
+        # open the config file in write-mode
+        with open(self.store_path + CREDENTIALS_FILE, "w") as cred_file:
+            # write the login details to disk
+            json.dump({
+                "homeserver": self.url,  # e.g. "https://matrix.example.org"
+                "user_id": user_id,  # e.g. "@user:example.org"
+                "device_id": device_id,  # device ID, 10 uppercase letters
+                "access_token": access_token  # cryptogr. access token
+                }, cred_file)
+
+    def get_credentials(self) -> Tuple[str, str, str]:
+        """
+        read previously saved credentials from disk
+        """
+
+        credentials_file = self.store_path + CREDENTIALS_FILE
+        if os.path.exists(credentials_file):
+            with open(credentials_file, "r") as cred_file:
+                creds = json.load(cred_file)
+                return (creds["user_id"], creds["device_id"],
+                        creds["access_token"])
+        return ("", "", "")
+
     async def connect(self, password: str, sync_token: str) -> str:
         """
         Connect to matrix server
         """
 
-        resp = await self.client.login(password)
-        if isinstance(resp, LoginResponse):
+        # try to restore previous login
+        user_id, device_id, access_token = self.get_credentials()
+        if access_token != "":
+            self.client.restore_login(
+                user_id=user_id,
+                device_id=device_id,
+                access_token=access_token,
+                )
             self.status = "online"
+        else:
+            resp = await self.client.login(password,
+                                           device_name="nuqql-matrixd-nio")
+            if isinstance(resp, LoginResponse):
+                self.status = "online"
 
+                # save credentials
+                self.save_credentials(resp.user_id, resp.device_id,
+                                      resp.access_token)
+
+        if self.status == "online":
             # start sync task
             sync_filter = {"room": {"timeline": {"limit": 0}}}
             await self.client.sync(timeout=30000, full_state=True,
