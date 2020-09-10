@@ -36,17 +36,16 @@ class MatrixClient:
                  membership_handler: Callable) -> None:
         if not os.path.isdir(store_path):
             os.mkdir(store_path)
-        self.config = AsyncClientConfig(
+        config = AsyncClientConfig(
             store_sync_tokens=True,
             encryption_enabled=True,
         )
         self.client = AsyncClient(url, username,
                                   store_path=store_path,
-                                  config=self.config,
+                                  config=config,
                                   )
         self.client.add_event_callback(self.message_callback, RoomMessageText)
         self.client.add_event_callback(self.member_callback, RoomMemberEvent)
-        self.token = ""
         self.status = "offline"
 
         # handlers
