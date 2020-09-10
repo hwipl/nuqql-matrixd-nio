@@ -40,8 +40,8 @@ class BackendClient:
         self.user = "@{}:{}".format(user, domain)
 
         # initialize matrix client connection
-        store_path = str(self.account.config.get_dir() / f"store{account.aid}")
-        self.client = MatrixClient(url, self.user, store_path, self._message,
+        path = str(self.account.config.get_dir() / f"account{account.aid}")
+        self.client = MatrixClient(url, self.user, path, self._message,
                                    self._membership_event)
 
         # sync token and connection config

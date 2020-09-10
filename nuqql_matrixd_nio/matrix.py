@@ -26,7 +26,8 @@ from nio import (  # type: ignore
     RoomMessageText
 )
 
-CREDENTIALS_FILE = "credentials.json"
+STORE_DIR_SUFFIX = "_store"
+CREDENTIALS_FILE_SUFFIX = "_credentials.json"
 
 
 class MatrixClient:
@@ -34,13 +35,14 @@ class MatrixClient:
     Matrix client class
     """
 
-    def __init__(self, url: str, username: str, store_path: str,
+    def __init__(self, url: str, username: str, path: str,
                  message_handler: Callable,
                  membership_handler: Callable) -> None:
         self.url = url
+        self.path = path
+        store_path = path + STORE_DIR_SUFFIX
         if not os.path.isdir(store_path):
             os.mkdir(store_path)
-        self.store_path = store_path
         config = AsyncClientConfig(
             store_sync_tokens=True,
             encryption_enabled=True,
@@ -102,7 +104,7 @@ class MatrixClient:
         """
 
         # open the config file in write-mode
-        with open(self.store_path + CREDENTIALS_FILE, "w") as cred_file:
+        with open(self.path + CREDENTIALS_FILE_SUFFIX, "w") as cred_file:
             # write the login details to disk
             json.dump({
                 "homeserver": self.url,  # e.g. "https://matrix.example.org"
@@ -116,7 +118,7 @@ class MatrixClient:
         read previously saved credentials from disk
         """
 
-        credentials_file = self.store_path + CREDENTIALS_FILE
+        credentials_file = self.path + CREDENTIALS_FILE_SUFFIX
         if os.path.exists(credentials_file):
             with open(credentials_file, "r") as cred_file:
                 creds = json.load(cred_file)
