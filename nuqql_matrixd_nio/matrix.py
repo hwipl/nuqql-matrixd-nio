@@ -36,8 +36,7 @@ class MatrixClient:
     """
 
     def __init__(self, url: str, username: str, path: str,
-                 message_handler: Callable,
-                 membership_handler: Callable) -> None:
+                 handlers: Tuple[Callable, ...]) -> None:
         self.url = url
         self.path = path
         store_path = path + STORE_DIR_SUFFIX
@@ -56,6 +55,7 @@ class MatrixClient:
         self.status = "offline"
 
         # handlers
+        message_handler, membership_handler = handlers
         self.message_handler = message_handler
         self.membership_handler = membership_handler
 
