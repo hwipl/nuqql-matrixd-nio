@@ -10,6 +10,7 @@ from typing import Callable, Dict, List, Tuple
 
 from nio import (  # type: ignore
     AsyncClient,
+    AsyncClientConfig,
     JoinError,
     JoinedMembersResponse,
     LocalProtocolError,
@@ -29,9 +30,17 @@ class MatrixClient:
     Matrix client class
     """
 
-    def __init__(self, url: str, username: str, message_handler: Callable,
+    def __init__(self, url: str, username: str, store_path: str,
+                 message_handler: Callable,
                  membership_handler: Callable) -> None:
-        self.client = AsyncClient(url, username)
+        self.config = AsyncClientConfig(
+            store_sync_tokens=True,
+            encryption_enabled=True,
+        )
+        self.client = AsyncClient(url, username,
+                                  store_path=store_path,
+                                  config=self.config,
+                                  )
         self.client.add_event_callback(self.message_callback, RoomMessageText)
         self.client.add_event_callback(self.member_callback, RoomMemberEvent)
         self.token = ""
@@ -154,7 +163,8 @@ class MatrixClient:
                             "format": "org.matrix.custom.html",
                             "formatted_body": html_msg,
                             "body": msg,
-                        }
+                        },
+                        ignore_unverified_devices=True,
                     )
                 except LocalProtocolError as error:
                     logging.error(error)
