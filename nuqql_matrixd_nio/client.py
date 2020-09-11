@@ -50,8 +50,6 @@ class BackendClient:
             membership_message_msg=True,
             # Send user message to client for membership events?
             membership_user_msg=True,
-            # Filter own messages?
-            filter_own=True
         )
 
         # data structures
@@ -136,10 +134,6 @@ class BackendClient:
         """
         Message handler
         """
-
-        # if filter_own is set, skip own messages
-        if self.settings.filter_own and sender == self.user:
-            return
 
         # save timestamp and message in messages list and history
         formatted_msg = Message.chat_msg(self.account, tstamp, sender, room_id,

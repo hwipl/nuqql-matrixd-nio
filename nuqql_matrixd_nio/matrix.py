@@ -29,6 +29,8 @@ from nio import (  # type: ignore
 STORE_DIR_SUFFIX = "_store"
 CREDENTIALS_FILE_SUFFIX = "_credentials.json"
 
+FILTER_OWN = True
+
 
 class MatrixClient:
     """
@@ -38,6 +40,7 @@ class MatrixClient:
     def __init__(self, url: str, username: str, path: str,
                  handlers: Tuple[Callable, ...]) -> None:
         self.url = url
+        self.user = username
         self.path = path
         store_path = path + STORE_DIR_SUFFIX
         if not os.path.isdir(store_path):
@@ -64,6 +67,10 @@ class MatrixClient:
         """
         Message handler
         """
+
+        # if filter own is set, skip own messages
+        if FILTER_OWN and event.sender == self.user:
+            return
 
         # save timestamp and message in messages list and history
         tstamp = str(int(event.server_timestamp/1000))
