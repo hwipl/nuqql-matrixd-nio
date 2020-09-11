@@ -72,7 +72,11 @@ class MatrixClient:
 
         # if filter own is set, skip own messages
         if FILTER_OWN and event.sender == self.user:
-            return
+            if event.transaction_id:
+                # only events from this client/device have a transaction ID;
+                # only filter these messages, so we still get our own messages
+                # from our other devices
+                return
 
         # save timestamp and message in messages list and history
         tstamp = str(int(event.server_timestamp/1000))
