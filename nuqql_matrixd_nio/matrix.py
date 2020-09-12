@@ -20,10 +20,25 @@ from nio import (  # type: ignore
     MatrixRoom,
     ProfileGetDisplayNameResponse,
     RoomCreateError,
+    RoomEncryptedAudio,
+    RoomEncryptedFile,
+    RoomEncryptedImage,
+    RoomEncryptedMedia,
+    RoomEncryptedVideo,
     RoomInviteError,
     RoomLeaveError,
     RoomMemberEvent,
-    RoomMessageText
+    RoomMessage,
+    RoomMessageAudio,
+    RoomMessageEmote,
+    RoomMessageFile,
+    RoomMessageFormatted,
+    RoomMessageImage,
+    RoomMessageMedia,
+    RoomMessageNotice,
+    RoomMessageText,
+    RoomMessageUnknown,
+    RoomMessageVideo,
 )
 
 # file/directory name settings
@@ -65,7 +80,7 @@ class MatrixClient:
         self.membership_handler = membership_handler
 
     async def message_callback(self, room: MatrixRoom,
-                               event: RoomMessageText) -> None:
+                               event: RoomMessage) -> None:
         """
         Message handler
         """
@@ -78,10 +93,34 @@ class MatrixClient:
                 # from our other devices
                 return
 
+        # all (e2ee) media
+        if isinstance(event, (RoomMessageMedia, RoomEncryptedMedia)):
+            media_mxc = event.url
+            media_url = await self.client.mxc_to_http(media_mxc)
+            msg_url = " [" + media_url + "]"
+
+        # handle media/message types
+        if isinstance(event, (RoomEncryptedAudio, RoomMessageAudio)):
+            msg = "*** posted audio: " + event.body + msg_url + " ***"
+        elif isinstance(event, RoomMessageEmote):
+            msg = "*** posted emote: " + event.body + " ***"
+        elif isinstance(event, (RoomEncryptedFile, RoomMessageFile)):
+            msg = "*** posted file: " + event.body + msg_url + " ***"
+        elif isinstance(event, (RoomMessageFormatted, RoomMessageNotice,
+                                RoomMessageText)):
+            msg = event.body
+        elif isinstance(event, (RoomEncryptedImage, RoomMessageImage)):
+            # Usually body is something like "image.svg"
+            msg = "*** posted image: " + event.body + msg_url + " ***"
+        elif isinstance(event, RoomMessageUnknown):
+            msg = "*** sent room message of unknown type: " + event.msgtype + \
+                    " ***"
+        elif isinstance(event, (RoomEncryptedVideo, RoomMessageVideo)):
+            msg = "*** posted video: " + event.body + msg_url + " ***"
+
         # save timestamp and message in messages list and history
         tstamp = str(int(event.server_timestamp/1000))
-        self.message_handler(tstamp, event.sender, room.machine_name,
-                             event.body)
+        self.message_handler(tstamp, event.sender, room.machine_name, msg)
 
     async def member_callback(self, room: MatrixRoom,
                               event: RoomMemberEvent) -> None:
