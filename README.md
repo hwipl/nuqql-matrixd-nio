@@ -1,20 +1,25 @@
 # nuqql-matrixd-nio
 
 nuqql-matrixd-nio is a network daemon that implements the nuqql interface and
-uses the [matrix-nio](https://github.com/poljar/matrix-nio) to connect to
-Matrix chat networks. It can be used as a backend for
+uses [matrix-nio](https://github.com/poljar/matrix-nio) to connect to Matrix
+chat networks. It can be used as a backend for
 [nuqql](https://github.com/hwipl/nuqql) or as a standalone chat client daemon.
 
 nuqql-matrixd-nio's dependencies are:
 * [nuqql-based](https://github.com/hwipl/nuqql-based)
-* [matrix-nio](https://github.com/poljar/matrix-nio)
+* [matrix-nio](https://github.com/poljar/matrix-nio) with enabled end-to-end
+  encryption which needs [libolm](https://gitlab.matrix.org/matrix-org/olm)
+  (version 3.x)
 * [daemon](https://pypi.org/project/python-daemon/) (optional)
 
 
 ## Quick Start
 
-You can install nuqql-matrixd-nio and its dependencies, for example, with pip
-for your user only from the source code directory with the following command:
+Make sure you have libolm and the latest nuqql-based (from git) installed.
+
+You can install nuqql-matrixd-nio and its other dependencies, for example, with
+pip for your user only from the source code directory with the following
+command:
 
 ```console
 $ pip install --user -e .
