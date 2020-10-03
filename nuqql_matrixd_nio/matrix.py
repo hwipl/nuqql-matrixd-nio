@@ -70,7 +70,7 @@ class MatrixClient:
                                   store_path=store_path,
                                   config=config,
                                   )
-        self.client.add_event_callback(self.message_callback, RoomMessageText)
+        self.client.add_event_callback(self.message_callback, RoomMessage)
         self.client.add_event_callback(self.member_callback, RoomMemberEvent)
         self.status = "offline"
 
