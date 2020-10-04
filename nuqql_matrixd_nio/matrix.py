@@ -178,6 +178,24 @@ class MatrixClient:
                         creds["access_token"])
         return ("", "", "")
 
+    async def sync_task(self, sync_token: str) -> None:
+        """
+        Start sync forever task
+        """
+
+        await self.client.sync_forever(
+            timeout=30000,
+            sync_filter={},
+            first_sync_filter={},
+            since=sync_token,
+            full_state=True,
+        )
+
+        # if sync_forever() terminates, something went wrong and we are
+        # probably offline. Set status to offline and trigger reconnect
+        logging.error("sync task stopped")
+        self.status = "offline"
+
     async def connect(self, password: str, sync_token: str) -> str:
         """
         Connect to matrix server
@@ -207,13 +225,7 @@ class MatrixClient:
             sync_filter = {"room": {"timeline": {"limit": 0}}}
             await self.client.sync(timeout=30000, full_state=True,
                                    sync_filter=sync_filter)
-            asyncio.create_task(self.client.sync_forever(
-                timeout=30000,
-                sync_filter={},
-                first_sync_filter={},
-                since=sync_token,
-                full_state=True,
-            ))
+            asyncio.create_task(self.sync_task(sync_token))
 
         return self.status  # remove return?
 
