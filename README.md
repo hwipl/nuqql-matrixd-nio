@@ -79,5 +79,5 @@ optional arguments:
 
 ## Changes
 
-* devel:
+* v0.1.0:
   * First/initial release.
