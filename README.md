@@ -15,14 +15,13 @@ nuqql-matrixd-nio's dependencies are:
 
 ## Quick Start
 
-Make sure you have libolm and the latest nuqql-based (from git) installed.
+Make sure you have libolm installed.
 
 You can install nuqql-matrixd-nio and its other dependencies, for example, with
-pip for your user only from the source code directory with the following
-command:
+pip for your user only with the following command:
 
 ```console
-$ pip install --user -e .
+$ pip install --user nuqql-matrixd-nio
 ```
 
 After the installation, you can run nuqql-matrixd-nio by running the
@@ -76,3 +75,9 @@ optional arguments:
   --disable-history     disable message history
   --push-accounts       push accounts to client
 ```
+
+
+## Changes
+
+* devel:
+  * First/initial release.
