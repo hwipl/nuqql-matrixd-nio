@@ -183,13 +183,17 @@ class MatrixClient:
         Start sync forever task
         """
 
-        await self.client.sync_forever(
-            timeout=30000,
-            sync_filter={},
-            first_sync_filter={},
-            since=sync_token,
-            full_state=True,
-        )
+        try:
+            await self.client.sync_forever(
+                timeout=30000,
+                sync_filter={},
+                first_sync_filter={},
+                since=sync_token,
+                full_state=True,
+            )
+        except Exception as error:  # pylint: disable=broad-except
+            logging.error("unhandled exception in sync_forever()")
+            logging.error(error)
 
         # if sync_forever() terminates, something went wrong and we are
         # probably offline. Set status to offline and trigger reconnect
