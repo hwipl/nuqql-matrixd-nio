@@ -7,7 +7,7 @@ import stat
 import os
 
 from typing import TYPE_CHECKING, List, Tuple
-from threading import Lock, Event
+from threading import Event
 from types import SimpleNamespace
 
 # nuqq-based imports
@@ -29,7 +29,7 @@ class BackendClient:
     Backend Client Class for connections to the IM network
     """
 
-    def __init__(self, account: "Account", lock: Lock) -> None:
+    def __init__(self, account: "Account") -> None:
         # account
         self.account = account
 
@@ -53,7 +53,6 @@ class BackendClient:
         )
 
         # data structures
-        self.lock = lock
         self.queue: List[Tuple[Callback, Tuple]] = []
 
     async def connect(self, sync_token) -> None:
@@ -175,10 +174,8 @@ class BackendClient:
             command and its parameters
         """
 
-        self.lock.acquire()
         # just add message tuple to queue
         self.queue.append((cmd, params))
-        self.lock.release()
 
     async def handle_queue(self) -> None:
         """
@@ -186,10 +183,8 @@ class BackendClient:
         """
 
         # create temporary copy and flush queue
-        self.lock.acquire()
         queue = self.queue[:]
         self.queue = []
-        self.lock.release()
 
         for cmd, params in queue:
             if cmd == Callback.SEND_MESSAGE:

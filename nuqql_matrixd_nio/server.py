@@ -7,7 +7,7 @@ import html
 import re
 
 from typing import TYPE_CHECKING, Dict, Optional, Tuple
-from threading import Lock, Event
+from threading import Event
 
 # nuqq-based imports
 from nuqql_based.based import Based
@@ -138,11 +138,8 @@ class BackendServer:
         running = Event()
         running.set()
 
-        # create a new lock for the task
-        lock = Lock()
-
         # init client connection
-        client = BackendClient(account, lock)
+        client = BackendClient(account)
 
         # save client connection in active connections dictionary
         self.connections[account.aid] = client
