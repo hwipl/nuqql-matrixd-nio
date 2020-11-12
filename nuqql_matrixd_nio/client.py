@@ -6,7 +6,7 @@ import asyncio
 import stat
 import os
 
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, Tuple
 from types import SimpleNamespace
 
 # nuqq-based imports
@@ -50,9 +50,6 @@ class BackendClient:
             membership_user_msg=True,
         )
 
-        # data structures
-        self.queue: List[Tuple[Callback, Tuple]] = []
-
     async def connect(self, sync_token) -> None:
         """
         Connect to server
@@ -79,9 +76,8 @@ class BackendClient:
                 # skip other parts until the client is really online
                 continue
 
-            # send pending outgoing messages, update the (safe copy of the)
-            # buddy list, update the sync token, then sleep a little bit
-            await self.handle_queue()
+            # update the (safe copy of the) buddy list,
+            # update the sync token, then sleep a little bit
             self.update_buddies()
             sync_token = self.update_sync_token(sync_token,
                                                 self.client.sync_token())
@@ -165,42 +161,29 @@ class BackendClient:
 
         self._muc_presence(presence, "offline")
 
-    def enqueue_command(self, cmd: Callback, params: Tuple) -> None:
+    async def handle_command(self, cmd: Callback, params: Tuple) -> None:
         """
-        Enqueue a command in the command queue
-        Tuple consists of:
+        Handle a command
+        Params tuple consists of:
             command and its parameters
         """
 
-        # just add message tuple to queue
-        self.queue.append((cmd, params))
-
-    async def handle_queue(self) -> None:
-        """
-        Handle all queued commands
-        """
-
-        # create temporary copy and flush queue
-        queue = self.queue[:]
-        self.queue = []
-
-        for cmd, params in queue:
-            if cmd == Callback.SEND_MESSAGE:
-                await self._send_message(params)
-            if cmd == Callback.SET_STATUS:
-                self._set_status(params[0])
-            if cmd == Callback.GET_STATUS:
-                self._get_status()
-            if cmd == Callback.CHAT_LIST:
-                self._chat_list()
-            if cmd == Callback.CHAT_JOIN:
-                await self._chat_join(params[0])
-            if cmd == Callback.CHAT_PART:
-                await self._chat_part(params[0])
-            if cmd == Callback.CHAT_USERS:
-                await self._chat_users(params[0])
-            if cmd == Callback.CHAT_INVITE:
-                await self._chat_invite(params[0], params[1])
+        if cmd == Callback.SEND_MESSAGE:
+            await self._send_message(params)
+        if cmd == Callback.SET_STATUS:
+            self._set_status(params[0])
+        if cmd == Callback.GET_STATUS:
+            self._get_status()
+        if cmd == Callback.CHAT_LIST:
+            self._chat_list()
+        if cmd == Callback.CHAT_JOIN:
+            await self._chat_join(params[0])
+        if cmd == Callback.CHAT_PART:
+            await self._chat_part(params[0])
+        if cmd == Callback.CHAT_USERS:
+            await self._chat_users(params[0])
+        if cmd == Callback.CHAT_INVITE:
+            await self._chat_invite(params[0], params[1])
 
     async def _send_message(self, message_tuple: Tuple) -> None:
         """
