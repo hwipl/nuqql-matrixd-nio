@@ -7,7 +7,6 @@ import stat
 import os
 
 from typing import TYPE_CHECKING, List, Tuple
-from threading import Event
 from types import SimpleNamespace
 
 # nuqq-based imports
@@ -20,7 +19,6 @@ from nuqql_matrixd_nio.matrix import (MatrixClient, parse_account_user,
 
 if TYPE_CHECKING:   # imports for typing
     # pylint: disable=ungrouped-imports
-    # TODO: move Event here?
     from nuqql_based.account import Account  # noqa
 
 
@@ -62,7 +60,7 @@ class BackendClient:
 
         await self.client.connect(self.account.password, sync_token)
 
-    async def start(self, running: Event) -> None:
+    async def start(self, running: asyncio.Event) -> None:
         """
         Start the client
         """

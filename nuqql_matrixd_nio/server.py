@@ -7,7 +7,6 @@ import html
 import re
 
 from typing import TYPE_CHECKING, Dict, Optional, Tuple
-from threading import Event
 
 # nuqq-based imports
 from nuqql_based.based import Based
@@ -34,7 +33,7 @@ class BackendServer:
 
     def __init__(self) -> None:
         self.connections: Dict[int, BackendClient] = {}
-        self.tasks: Dict[int, Tuple[asyncio.Task, Event]] = {}
+        self.tasks: Dict[int, Tuple[asyncio.Task, asyncio.Event]] = {}
         self.based = Based("matrixd-nio", VERSION)
 
     async def start(self) -> None:
@@ -135,7 +134,7 @@ class BackendServer:
             return ""
 
         # event to signal if task should stop
-        running = Event()
+        running = asyncio.Event()
         running.set()
 
         # init client connection
