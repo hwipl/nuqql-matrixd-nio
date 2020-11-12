@@ -18,6 +18,7 @@ from nuqql_matrixd_nio.matrix import unescape_name
 
 if TYPE_CHECKING:   # imports for typing
     # pylint: disable=ungrouped-imports
+    from nuqql_based.based import CallbackList
     from nuqql_based.account import Account  # noqa
 
 
@@ -42,7 +43,7 @@ class BackendServer:
         """
 
         # set callbacks
-        callbacks = [
+        callbacks: "CallbackList" = [
             # based events
             (Callback.BASED_INTERRUPT, self.based_interrupt),
             (Callback.BASED_QUIT, self.based_quit),
@@ -66,8 +67,8 @@ class BackendServer:
         # start based
         await self.based.start()
 
-    def enqueue(self, account: Optional["Account"], cmd: Callback,
-                params: Tuple) -> str:
+    async def enqueue(self, account: Optional["Account"], cmd: Callback,
+                      params: Tuple) -> str:
         """
         add commands to the command queue of the account/client
         """
@@ -83,8 +84,8 @@ class BackendServer:
 
         return ""
 
-    def send_message(self, account: Optional["Account"], cmd: Callback,
-                     params: Tuple) -> str:
+    async def send_message(self, account: Optional["Account"], cmd: Callback,
+                           params: Tuple) -> str:
         """
         send a message to a destination  on an account
         """
@@ -105,13 +106,13 @@ class BackendServer:
         msg = "\n".join(re.split("<br/>", msg, flags=re.IGNORECASE))
 
         # send message
-        self.enqueue(account, cmd, (unescape_name(dest), msg, html_msg,
-                                    msg_type))
+        await self.enqueue(account, cmd, (unescape_name(dest), msg, html_msg,
+                                          msg_type))
 
         return ""
 
-    def chat_send(self, account: Optional["Account"], _cmd: Callback,
-                  params: Tuple) -> str:
+    async def chat_send(self, account: Optional["Account"], _cmd: Callback,
+                        params: Tuple) -> str:
         """
         Send message to chat on account
         """
@@ -119,11 +120,11 @@ class BackendServer:
         chat, msg = params
         # TODO: use cmd to infer msg type in send_message and remove this
         # function?
-        return self.send_message(account, Callback.SEND_MESSAGE,
-                                 (chat, msg, "groupchat"))
+        return await self.send_message(account, Callback.SEND_MESSAGE,
+                                       (chat, msg, "groupchat"))
 
-    def add_account(self, account: Optional["Account"], _cmd: Callback,
-                    _params: Tuple) -> str:
+    async def add_account(self, account: Optional["Account"], _cmd: Callback,
+                          _params: Tuple) -> str:
         """
         Add a new account (from based) and run a new client task for it
         """
@@ -151,8 +152,8 @@ class BackendServer:
 
         return ""
 
-    def del_account(self, account: Optional["Account"], _cmd: Callback,
-                    _params: Tuple) -> str:
+    async def del_account(self, account: Optional["Account"], _cmd: Callback,
+                          _params: Tuple) -> str:
         """
         Delete an existing account (in based) and
         stop matrix client thread for it
@@ -174,8 +175,8 @@ class BackendServer:
 
         return ""
 
-    def stop_thread(self, account: Optional["Account"], _cmd: Callback,
-                    _params: Tuple) -> str:
+    async def stop_thread(self, account: Optional["Account"], _cmd: Callback,
+                          _params: Tuple) -> str:
         """
         Quit backend/stop client thread
         """
@@ -187,8 +188,8 @@ class BackendServer:
         running.clear()
         return ""
 
-    def based_interrupt(self, _account: Optional["Account"], _cmd: Callback,
-                        _params: Tuple) -> str:
+    async def based_interrupt(self, _account: Optional["Account"],
+                              _cmd: Callback, _params: Tuple) -> str:
         """
         KeyboardInterrupt event in based
         """
@@ -198,8 +199,8 @@ class BackendServer:
             running.clear()
         return ""
 
-    def based_quit(self, _account: Optional["Account"], _cmd: Callback,
-                   _params: Tuple) -> str:
+    async def based_quit(self, _account: Optional["Account"], _cmd: Callback,
+                         _params: Tuple) -> str:
         """
         Based shut down event
         """
