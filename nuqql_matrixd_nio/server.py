@@ -37,7 +37,7 @@ class BackendServer:
         self.threads: Dict[int, Tuple[Thread, Event]] = {}
         self.based = Based("matrixd-nio", VERSION)
 
-    def start(self) -> None:
+    async def start(self) -> None:
         """
         Start server
         """
@@ -65,7 +65,7 @@ class BackendServer:
         self.based.set_callbacks(callbacks)
 
         # start based
-        self.based.start()
+        await self.based.start()
 
     def enqueue(self, account: Optional["Account"], cmd: Callback,
                 params: Tuple) -> str:

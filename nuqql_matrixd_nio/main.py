@@ -4,16 +4,26 @@
 matrixd main entry point
 """
 
+import asyncio
+
 from nuqql_matrixd_nio.server import BackendServer
 
 
-def main() -> None:
+async def _main() -> None:
     """
     Main function, initialize everything and start server
     """
 
     server = BackendServer()
-    server.start()
+    await server.start()
+
+
+def main() -> None:
+    """
+    Main entry point
+    """
+
+    asyncio.run(_main())
 
 
 if __name__ == '__main__':
