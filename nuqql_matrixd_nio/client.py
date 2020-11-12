@@ -76,9 +76,7 @@ class BackendClient:
                 # skip other parts until the client is really online
                 continue
 
-            # update the (safe copy of the) buddy list,
             # update the sync token, then sleep a little bit
-            self.update_buddies()
             sync_token = self.update_sync_token(sync_token,
                                                 self.client.sync_token())
             await asyncio.sleep(0.1)
@@ -168,6 +166,8 @@ class BackendClient:
             command and its parameters
         """
 
+        if cmd == Callback.UPDATE_BUDDIES:
+            self.update_buddies()
         if cmd == Callback.SEND_MESSAGE:
             await self._send_message(params)
         if cmd == Callback.SET_STATUS:
