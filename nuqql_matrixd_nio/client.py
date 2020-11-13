@@ -6,7 +6,7 @@ import asyncio
 import stat
 import os
 
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING, Optional, Tuple
 from types import SimpleNamespace
 
 # nuqq-based imports
@@ -42,6 +42,9 @@ class BackendClient:
         self.client = MatrixClient(url, self.user, path,
                                    (self._message, self._membership_event))
 
+        # client task
+        self.task: Optional[asyncio.Task] = None
+
         # load sync token
         self.sync_token = self.load_sync_token()
 
@@ -53,9 +56,9 @@ class BackendClient:
             membership_user_msg=True,
         )
 
-    async def start(self, running: asyncio.Event) -> None:
+    async def _start(self, running: asyncio.Event) -> None:
         """
-        Start the client
+        Start the client as a task
         """
 
         # enter main loop, and keep running until "running" is set to false
@@ -69,6 +72,21 @@ class BackendClient:
 
             # sleep a little bit before reconnecting
             await asyncio.sleep(15)
+
+    async def start(self, running: asyncio.Event) -> None:
+        """
+        Start the client
+        """
+
+        # create and start task
+        self.task = asyncio.create_task(self._start(running))
+
+    def stop(self) -> None:
+        """
+        Stop the client
+        """
+
+        self.client.stop()
 
     def _membership_event(self, *params):
         """

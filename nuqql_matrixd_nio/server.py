@@ -34,7 +34,6 @@ class BackendServer:
 
     def __init__(self) -> None:
         self.connections: Dict[int, BackendClient] = {}
-        self.tasks: Dict[int, Tuple[asyncio.Task, asyncio.Event]] = {}
         self.based = Based("matrixd-nio", VERSION)
 
     async def start(self) -> None:
@@ -145,11 +144,8 @@ class BackendServer:
         # save client connection in active connections dictionary
         self.connections[account.aid] = client
 
-        # create and start task
-        task = asyncio.create_task(client.start(running))
-
-        # save task in active tasks dictionary
-        self.tasks[account.aid] = (task, running)
+        # start client
+        await client.start(running)
 
         return ""
 
@@ -157,22 +153,17 @@ class BackendServer:
                           _params: Tuple) -> str:
         """
         Delete an existing account (in based) and
-        stop matrix client thread for it
+        stop matrix client task for it
         """
 
-        # stop thread
-        assert account
-        task, running = self.tasks[account.aid]
-        running.clear()
-        asyncio.gather(task)
-
         # let client clean up
+        assert account
         client = self.connections[account.aid]
+        client.stop()
         client.del_account()
 
         # cleanup
         del self.connections[account.aid]
-        del self.tasks[account.aid]
 
         return ""
 
@@ -185,8 +176,8 @@ class BackendServer:
         # stop task
         print("Signalling account tasks to stop.")
         assert account
-        _task, running = self.tasks[account.aid]
-        running.clear()
+        client = self.connections[account.aid]
+        client.stop()
         return ""
 
     async def based_interrupt(self, _account: Optional["Account"],
@@ -195,9 +186,9 @@ class BackendServer:
         KeyboardInterrupt event in based
         """
 
-        for _task, running in self.tasks.values():
+        for client in self.connections.values():
             print("Signalling account task to stop.")
-            running.clear()
+            client.stop()
         return ""
 
     async def based_quit(self, _account: Optional["Account"], _cmd: Callback,
@@ -207,6 +198,7 @@ class BackendServer:
         """
 
         print("Waiting for all tasks to finish. This might take a while.")
-        for task, _running in self.tasks.values():
-            asyncio.gather(task)
+        for client in self.connections.values():
+            assert client.task
+            asyncio.gather(client.task)
         return ""
