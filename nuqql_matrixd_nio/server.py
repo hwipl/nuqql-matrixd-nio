@@ -134,10 +134,6 @@ class BackendServer:
         if account.type != "matrix":
             return ""
 
-        # event to signal if task should stop
-        running = asyncio.Event()
-        running.set()
-
         # init client connection
         client = BackendClient(account)
 
@@ -145,7 +141,7 @@ class BackendServer:
         self.connections[account.aid] = client
 
         # start client
-        await client.start(running)
+        await client.start()
 
         return ""
 

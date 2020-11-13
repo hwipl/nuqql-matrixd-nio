@@ -56,14 +56,14 @@ class BackendClient:
             membership_user_msg=True,
         )
 
-    async def _start(self, running: asyncio.Event) -> None:
+    async def _start(self) -> None:
         """
         Start the client as a task
         """
 
         # enter main loop, and keep running until "running" is set to false
         # by the KeyboardInterrupt
-        while running.is_set():
+        while True:
             # if client is offline, (re)connect
             if self.client.status == "offline":
                 # start client connection
@@ -73,13 +73,13 @@ class BackendClient:
             # sleep a little bit before reconnecting
             await asyncio.sleep(15)
 
-    async def start(self, running: asyncio.Event) -> None:
+    async def start(self) -> None:
         """
         Start the client
         """
 
         # create and start task
-        self.task = asyncio.create_task(self._start(running))
+        self.task = asyncio.create_task(self._start())
 
     def stop(self) -> None:
         """
