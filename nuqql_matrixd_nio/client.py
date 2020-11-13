@@ -42,6 +42,9 @@ class BackendClient:
         self.client = MatrixClient(url, self.user, path,
                                    (self._message, self._membership_event))
 
+        # load sync token
+        self.sync_token = self.load_sync_token()
+
         # sync token and connection config
         self.settings = SimpleNamespace(
             # Send regular message to client for membership events?
@@ -50,12 +53,12 @@ class BackendClient:
             membership_user_msg=True,
         )
 
-    async def connect(self, sync_token) -> None:
+    async def connect(self) -> None:
         """
         Connect to server
         """
 
-        await self.client.connect(self.account.password, sync_token)
+        await self.client.connect(self.account.password, self.sync_token)
 
     async def start(self, running: asyncio.Event) -> None:
         """
@@ -67,18 +70,14 @@ class BackendClient:
         while running.is_set():
             # if client is offline, (re)connect
             if self.client.status == "offline":
-                # initialize sync token with last known value
-                sync_token = self.load_sync_token()
-
                 # start client connection
-                await self.connect(sync_token)
+                await self.connect()
 
                 # skip other parts until the client is really online
                 continue
 
             # update the sync token, then sleep a little bit
-            sync_token = self.update_sync_token(sync_token,
-                                                self.client.sync_token())
+            self.update_sync_token()
             await asyncio.sleep(0.1)
 
         # stop the listener thread in the matrix client
@@ -332,10 +331,13 @@ class BackendClient:
 
         return token
 
-    def update_sync_token(self, old: str, new: str) -> str:
+    def update_sync_token(self) -> str:
         """
         Update an existing sync token with a newer one
         """
+
+        old = self.sync_token
+        new = self.client.sync_token()
 
         if old == new:
             # tokens are not different
