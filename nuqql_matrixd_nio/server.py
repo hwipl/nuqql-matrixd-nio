@@ -49,7 +49,7 @@ class BackendServer:
             (Callback.BASED_QUIT, self.based_quit),
 
             # nuqql messages
-            (Callback.QUIT, self.stop_thread),
+            (Callback.QUIT, self.stop_task),
             (Callback.ADD_ACCOUNT, self.add_account),
             (Callback.DEL_ACCOUNT, self.del_account),
             (Callback.UPDATE_BUDDIES, self.handle_command),
@@ -176,15 +176,15 @@ class BackendServer:
 
         return ""
 
-    async def stop_thread(self, account: Optional["Account"], _cmd: Callback,
-                          _params: Tuple) -> str:
+    async def stop_task(self, account: Optional["Account"], _cmd: Callback,
+                        _params: Tuple) -> str:
         """
-        Quit backend/stop client thread
+        Quit backend/stop client task
         """
 
-        # stop thread
-        assert account
+        # stop task
         print("Signalling account tasks to stop.")
+        assert account
         _task, running = self.tasks[account.aid]
         running.clear()
         return ""
