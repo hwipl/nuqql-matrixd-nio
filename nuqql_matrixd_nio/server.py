@@ -2,7 +2,6 @@
 matrixd backend server
 """
 
-import asyncio
 import html
 import re
 
@@ -155,7 +154,7 @@ class BackendServer:
         # let client clean up
         assert account
         client = self.connections[account.aid]
-        client.stop()
+        await client.stop()
         client.del_account()
 
         # cleanup
@@ -173,7 +172,7 @@ class BackendServer:
         print("Signalling account tasks to stop.")
         assert account
         client = self.connections[account.aid]
-        client.stop()
+        await client.stop()
         return ""
 
     async def based_interrupt(self, _account: Optional["Account"],
@@ -184,7 +183,7 @@ class BackendServer:
 
         for client in self.connections.values():
             print("Signalling account task to stop.")
-            client.stop()
+            await client.stop()
         return ""
 
     async def based_quit(self, _account: Optional["Account"], _cmd: Callback,
@@ -196,5 +195,5 @@ class BackendServer:
         print("Waiting for all tasks to finish. This might take a while.")
         for client in self.connections.values():
             assert client.task
-            asyncio.gather(client.task)
+            await client.task
         return ""

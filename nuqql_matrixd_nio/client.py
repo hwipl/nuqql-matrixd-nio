@@ -45,6 +45,9 @@ class BackendClient:
         # client task
         self.task: Optional[asyncio.Task] = None
 
+        # is client active?
+        self.active = True
+
         # load sync token
         self.sync_token = self.load_sync_token()
 
@@ -63,15 +66,22 @@ class BackendClient:
 
         # enter main loop, and keep running until "running" is set to false
         # by the KeyboardInterrupt
-        while True:
-            # if client is offline, (re)connect
-            if self.client.status == "offline":
-                # start client connection
-                await self.client.connect(self.account.password,
-                                          self.sync_token)
+        try:
+            while True:
+                # if client is offline, (re)connect
+                if self.client.status == "offline":
+                    # start client connection
+                    await self.client.connect(self.account.password,
+                                              self.sync_token)
 
-            # sleep a little bit before reconnecting
-            await asyncio.sleep(15)
+                # stop, if client is inactive
+                if not self.active:
+                    return
+
+                # sleep a little bit before reconnecting
+                await asyncio.sleep(15)
+        except asyncio.CancelledError:
+            return
 
     async def start(self) -> None:
         """
@@ -81,12 +91,15 @@ class BackendClient:
         # create and start task
         self.task = asyncio.create_task(self._start())
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """
         Stop the client
         """
 
-        self.client.stop()
+        self.active = False
+        assert self.task
+        self.task.cancel()
+        await self.task
 
     def _membership_event(self, *params):
         """
