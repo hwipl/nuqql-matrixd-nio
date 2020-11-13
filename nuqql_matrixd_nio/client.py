@@ -53,13 +53,6 @@ class BackendClient:
             membership_user_msg=True,
         )
 
-    async def connect(self) -> None:
-        """
-        Connect to server
-        """
-
-        await self.client.connect(self.account.password, self.sync_token)
-
     async def start(self, running: asyncio.Event) -> None:
         """
         Start the client
@@ -71,16 +64,11 @@ class BackendClient:
             # if client is offline, (re)connect
             if self.client.status == "offline":
                 # start client connection
-                await self.connect()
+                await self.client.connect(self.account.password,
+                                          self.sync_token)
 
-                # skip other parts until the client is really online
-                continue
-
-            # sleep a little bit
-            await asyncio.sleep(0.1)
-
-        # stop the listener thread in the matrix client
-        self.client.stop()
+            # sleep a little bit before reconnecting
+            await asyncio.sleep(15)
 
     def _membership_event(self, *params):
         """

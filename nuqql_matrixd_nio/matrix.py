@@ -2,7 +2,6 @@
 matrix specific stuff
 """
 
-import asyncio
 import json
 import logging
 import os
@@ -229,7 +228,7 @@ class MatrixClient:
             sync_filter = {"room": {"timeline": {"limit": 0}}}
             await self.client.sync(timeout=30000, full_state=True,
                                    sync_filter=sync_filter)
-            asyncio.create_task(self.sync_task(sync_token))
+            await self.sync_task(sync_token)
 
         return self.status  # remove return?
 
