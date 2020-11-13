@@ -76,8 +76,7 @@ class BackendClient:
                 # skip other parts until the client is really online
                 continue
 
-            # update the sync token, then sleep a little bit
-            self.update_sync_token()
+            # sleep a little bit
             await asyncio.sleep(0.1)
 
         # stop the listener thread in the matrix client
@@ -120,6 +119,9 @@ class BackendClient:
         if self.settings.membership_message_msg:
             self.account.receive_msg(formatted_msg)
 
+        # update sync token
+        self.update_sync_token()
+
     def _message(self, tstamp, sender, room_id, msg) -> None:
         """
         Message handler
@@ -129,6 +131,9 @@ class BackendClient:
         formatted_msg = Message.chat_msg(self.account, tstamp, sender, room_id,
                                          msg)
         self.account.receive_msg(formatted_msg)
+
+        # update sync token
+        self.update_sync_token()
 
     def muc_message(self, msg) -> None:
         """
@@ -183,6 +188,9 @@ class BackendClient:
             await self._chat_users(params[0])
         if cmd == Callback.CHAT_INVITE:
             await self._chat_invite(params[0], params[1])
+
+        # update sync token
+        self.update_sync_token()
 
     async def _send_message(self, message_tuple: Tuple) -> None:
         """
