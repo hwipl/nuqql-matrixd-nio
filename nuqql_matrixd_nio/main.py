@@ -23,7 +23,10 @@ def main() -> None:
     Main entry point
     """
 
-    asyncio.run(_main())
+    try:
+        asyncio.run(_main())
+    except KeyboardInterrupt:
+        return
 
 
 if __name__ == '__main__':
