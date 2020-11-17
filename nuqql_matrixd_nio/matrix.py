@@ -230,6 +230,9 @@ class MatrixClient:
                                    sync_filter=sync_filter)
             await self.sync_task(sync_token)
 
+            # close underlying http session
+            await self.client.close()
+
         return self.status  # remove return?
 
     def stop(self) -> None:

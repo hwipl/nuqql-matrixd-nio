@@ -81,6 +81,8 @@ class BackendClient:
                 # sleep a little bit before reconnecting
                 await asyncio.sleep(15)
         except asyncio.CancelledError:
+            # close underlying http session
+            await self.client.client.close()
             return
 
     async def start(self) -> None:
