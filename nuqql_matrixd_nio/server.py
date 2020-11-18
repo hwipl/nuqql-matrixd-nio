@@ -7,7 +7,7 @@ import re
 
 from typing import TYPE_CHECKING, Dict, Optional, Tuple
 
-# nuqq-based imports
+# nuqql-based imports
 from nuqql_based.based import Based
 from nuqql_based.callback import Callback
 
