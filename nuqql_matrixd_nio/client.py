@@ -64,8 +64,7 @@ class BackendClient:
         Start the client as a task
         """
 
-        # enter main loop, and keep running until "running" is set to false
-        # by the KeyboardInterrupt
+        # enter main loop
         try:
             while True:
                 # if client is offline, (re)connect
