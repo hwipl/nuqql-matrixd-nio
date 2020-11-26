@@ -311,6 +311,10 @@ class BackendClient:
         if self.client.status == "offline":
             return
 
+        # if only online wanted, skip because no matrix room is "online"
+        if online:
+            return
+
         # get buddies/rooms
         rooms = self.client.get_rooms()
         for room in rooms.values():
@@ -320,16 +324,10 @@ class BackendClient:
             status = "GROUP_CHAT"
 
             # send buddy message
-            if online and status != "Available":
-                continue
             msg = Message.buddy(self.account, room.room_id, name, status)
             self.account.receive_msg(msg)
 
         # handle pending room invites as temporary buddies
-        if online:
-            # invites are not online
-            return
-
         invites = self.client.get_invites()
         for invite in invites.values():
             status = "GROUP_CHAT_INVITE"
