@@ -50,6 +50,7 @@ class BackendServer:
             # nuqql messages
             (Callback.QUIT, self.stop_task),
             (Callback.HELP_WELCOME, self._help_welcome),
+            (Callback.HELP_ACCOUNT_ADD, self._help_account_add),
             (Callback.ADD_ACCOUNT, self.add_account),
             (Callback.DEL_ACCOUNT, self.del_account),
             (Callback.GET_BUDDIES, self.handle_command),
@@ -163,6 +164,21 @@ class BackendServer:
         del self.connections[account.aid]
 
         return ""
+
+    async def _help_account_add(self, _account: Optional["Account"],
+                                _cmd: Callback, _params: Tuple) -> str:
+        """
+        Handle account add help event
+        """
+
+        add_help = Message.info("You do not have any accounts configured.")
+        add_help += Message.info("You can add a new matrix account with the "
+                                 "following command: "
+                                 "account add matrix <username>@<homeserver> "
+                                 "<password>")
+        add_help += Message.info("Example: account add matrix "
+                                 "dummy@matrix.org MyPassword")
+        return add_help
 
     async def _help_welcome(self, _account: Optional["Account"],
                             _cmd: Callback, _params: Tuple) -> str:
