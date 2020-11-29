@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Dict, Optional, Tuple
 # nuqql-based imports
 from nuqql_based.based import Based
 from nuqql_based.callback import Callback
+from nuqql_based.message import Message
 
 # matrixd imports
 from nuqql_matrixd_nio.client import BackendClient
@@ -48,6 +49,7 @@ class BackendServer:
 
             # nuqql messages
             (Callback.QUIT, self.stop_task),
+            (Callback.HELP_WELCOME, self._help_welcome),
             (Callback.ADD_ACCOUNT, self.add_account),
             (Callback.DEL_ACCOUNT, self.del_account),
             (Callback.GET_BUDDIES, self.handle_command),
@@ -161,6 +163,19 @@ class BackendServer:
         del self.connections[account.aid]
 
         return ""
+
+    async def _help_welcome(self, _account: Optional["Account"],
+                            _cmd: Callback, _params: Tuple) -> str:
+        """
+        Handle welcome help message event
+        """
+
+        welcome = Message.info(f"Welcome to nuqql-matrixd-nio v{VERSION}!")
+        welcome += Message.info("Enter \"help\" for a list of available "
+                                "commands and their help texts")
+        if self.based.config.get_push_accounts():
+            welcome += Message.info("Listing your accounts:")
+        return welcome
 
     async def stop_task(self, account: Optional["Account"], _cmd: Callback,
                         _params: Tuple) -> str:
