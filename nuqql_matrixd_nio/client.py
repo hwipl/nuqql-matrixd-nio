@@ -361,7 +361,7 @@ class BackendClient:
 
         return token
 
-    def update_sync_token(self) -> str:
+    def update_sync_token(self) -> None:
         """
         Update an existing sync token with a newer one
         """
@@ -369,9 +369,10 @@ class BackendClient:
         old = self.sync_token
         new = self.client.sync_token()
 
+        # update sync token if necessary
         if old == new:
-            # tokens are not different
-            return old
+            return
+        self.sync_token = new
 
         # update token file
         acc_id = self.account.aid
@@ -381,9 +382,7 @@ class BackendClient:
             with open(sync_token_file, "w") as token_file:
                 token_file.write(new)
         except OSError:
-            return old
-
-        return new
+            return
 
     def delete_sync_token(self) -> None:
         """
