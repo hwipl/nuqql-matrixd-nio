@@ -79,5 +79,7 @@ optional arguments:
 
 ## Changes
 
+* devel:
+  * Update nuqql-based
 * v0.1.0:
   * First/initial release.
