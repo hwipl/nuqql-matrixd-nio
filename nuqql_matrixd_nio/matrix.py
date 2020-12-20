@@ -45,7 +45,7 @@ STORE_DIR_SUFFIX = "_store"
 CREDENTIALS_FILE_SUFFIX = "_credentials.json"
 
 # filter own messages?
-FILTER_OWN = True
+FILTER_OWN = False
 
 
 class MatrixClient:
