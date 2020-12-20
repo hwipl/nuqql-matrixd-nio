@@ -92,6 +92,11 @@ class MatrixClient:
                 # from our other devices
                 return
 
+        # rewrite sender of own messages
+        sender = event.sender
+        if event.sender == self.user:
+            sender = "<self>"
+
         # all (e2ee) media
         if isinstance(event, (RoomMessageMedia, RoomEncryptedMedia)):
             media_mxc = event.url
@@ -119,7 +124,7 @@ class MatrixClient:
 
         # save timestamp and message in messages list and history
         tstamp = str(int(event.server_timestamp/1000))
-        self.message_handler(tstamp, event.sender, room.machine_name, msg)
+        self.message_handler(tstamp, sender, room.machine_name, msg)
 
     async def member_callback(self, room: MatrixRoom,
                               event: RoomMemberEvent) -> None:
