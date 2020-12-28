@@ -13,6 +13,7 @@ from nuqql_based.callback import Callback
 from nuqql_based.message import Message
 
 # matrixd imports
+import nuqql_matrixd_nio.matrix
 from nuqql_matrixd_nio.client import BackendClient
 from nuqql_matrixd_nio.matrix import unescape_name
 
@@ -44,6 +45,7 @@ class BackendServer:
         # set callbacks
         callbacks: "CallbackList" = [
             # based events
+            (Callback.BASED_CONFIG, self._based_config),
             (Callback.BASED_INTERRUPT, self.based_interrupt),
             (Callback.BASED_QUIT, self.based_quit),
 
@@ -204,6 +206,18 @@ class BackendServer:
         assert account
         client = self.connections[account.aid]
         await client.stop()
+        return ""
+
+    async def _based_config(self, _account: Optional["Account"],
+                            _cmd: Callback, params: Tuple) -> str:
+        """
+        Config event in based
+        """
+
+        # read filter own setting from config
+        config = params[0]
+        nuqql_matrixd_nio.matrix.FILTER_OWN = config.get_filter_own()
+
         return ""
 
     async def based_interrupt(self, _account: Optional["Account"],
