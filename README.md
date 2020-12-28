@@ -54,26 +54,28 @@ In the telnet session you can:
 See `nuqql-matrixd-nio --help` for a list of command line arguments:
 
 ```
-usage: nuqql-matrixd-nio [-h] [--version] [--af {inet,unix}] [--address
-ADDRESS] [--port PORT] [--sockfile SOCKFILE] [--dir DIR] [-d] [--loglevel
-{debug,info,warn,error}] [--disable-history] [--push-accounts]
+usage: nuqql-matrixd-nio [--address ADDRESS] [--af {inet,unix}] [-d] [--dir
+DIR] [--disable-history] [--filter-own] [-h] [--loglevel
+{debug,info,warn,error}] [--port PORT] [--push-accounts] [--sockfile SOCKFILE]
+[--version]
 
 Run nuqql backend.
 
 optional arguments:
-  -h, --help            show this help message and exit
-  --version             show program's version number and exit
-  --af {inet,unix}      socket address family: "inet" for AF_INET, "unix" for
-                        AF_UNIX
-  --address ADDRESS     AF_INET listen address
-  --port PORT           AF_INET listen port
-  --sockfile SOCKFILE   AF_UNIX socket file in DIR
-  --dir DIR             working directory
+  --address ADDRESS     set AF_INET listen address
+  --af {inet,unix}      set socket address family: "inet" for AF_INET, "unix"
+                        for AF_UNIX
   -d, --daemonize       daemonize process
-  --loglevel {debug,info,warn,error}
-                        Logging level
+  --dir DIR             set working directory
   --disable-history     disable message history
-  --push-accounts       push accounts to client
+  --filter-own          enable filtering of own messages
+  -h, --help            show this help message and exit
+  --loglevel {debug,info,warn,error}
+                        set logging level
+  --port PORT           set AF_INET listen port
+  --push-accounts       enable pushing accounts to client
+  --sockfile SOCKFILE   set AF_UNIX socket file in DIR
+  --version             show program's version number and exit
 ```
 
 
