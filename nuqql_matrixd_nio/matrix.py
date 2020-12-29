@@ -57,7 +57,6 @@ class MatrixClient:
                  handlers: Tuple[Callable, ...]) -> None:
         self.account = account
         url, user, domain = parse_account_user(account.user)
-        self.url = url
         username = "@{}:{}".format(user, domain)
         self.user = username
         self.path = str(self.account.config.get_dir() /
@@ -163,11 +162,12 @@ class MatrixClient:
         save credentials like access token to disk for later logins
         """
 
+        url, _user, _domain = parse_account_user(self.account.user)
         # open the config file in write-mode
         with open(self.path + CREDENTIALS_FILE_SUFFIX, "w") as cred_file:
             # write the login details to disk
             json.dump({
-                "homeserver": self.url,  # e.g. "https://matrix.example.org"
+                "homeserver": url,  # e.g. "https://matrix.example.org"
                 "user_id": user_id,  # e.g. "@user:example.org"
                 "device_id": device_id,  # device ID, 10 uppercase letters
                 "access_token": access_token  # cryptogr. access token
