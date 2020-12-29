@@ -81,6 +81,14 @@ class MatrixClient:
         self.message_handler = message_handler
         self.membership_handler = membership_handler
 
+    def get_path(self) -> str:
+        """
+        Get working directory from config
+        """
+
+        return str(self.account.config.get_dir() /
+                   f"account{self.account.aid}")
+
     async def message_callback(self, room: MatrixRoom,
                                event: RoomMessage) -> None:
         """
