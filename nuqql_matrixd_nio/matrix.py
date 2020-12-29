@@ -47,9 +47,6 @@ if TYPE_CHECKING:   # imports for typing
 STORE_DIR_SUFFIX = "_store"
 CREDENTIALS_FILE_SUFFIX = "_credentials.json"
 
-# filter own messages?
-FILTER_OWN = False
-
 
 class MatrixClient:
     """
@@ -92,7 +89,7 @@ class MatrixClient:
         """
 
         # if filter own is set, skip own messages
-        if FILTER_OWN and event.sender == self.user:
+        if self.account.config.get_filter_own() and event.sender == self.user:
             if event.transaction_id:
                 # only events from this client/device have a transaction ID;
                 # only filter these messages, so we still get our own messages
