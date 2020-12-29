@@ -5,6 +5,7 @@ matrix specific stuff
 import json
 import logging
 import os
+import stat
 import urllib.parse
 
 from typing import Callable, Dict, List, Tuple, TYPE_CHECKING
@@ -76,6 +77,9 @@ class MatrixClient:
         self.message_handler = message_handler
         self.membership_handler = membership_handler
 
+        # load sync token
+        self.sync_token = self._load_sync_token()
+
     def get_user(self) -> str:
         """
         Get matrix user id
@@ -106,6 +110,9 @@ class MatrixClient:
         """
         Message handler
         """
+
+        # update sync token
+        self._update_sync_token()
 
         # if filter own is set, skip own messages
         if self.account.config.get_filter_own() and \
@@ -158,6 +165,9 @@ class MatrixClient:
 
         tstamp = str(int(event.server_timestamp/1000))
 
+        # update sync token
+        self._update_sync_token()
+
         # set display name of user
         display_name = room.user_name(event.sender)
         if event.membership == "leave":
@@ -206,7 +216,7 @@ class MatrixClient:
                         creds["access_token"])
         return ("", "", "")
 
-    async def sync_task(self, sync_token: str) -> None:
+    async def sync_task(self) -> None:
         """
         Start sync forever task
         """
@@ -216,7 +226,7 @@ class MatrixClient:
                 timeout=30000,
                 sync_filter={},
                 first_sync_filter={},
-                since=sync_token,
+                since=self.sync_token,
                 full_state=True,
             )
         except Exception as error:  # pylint: disable=broad-except
@@ -228,7 +238,7 @@ class MatrixClient:
         logging.error("sync task stopped")
         self.status = "offline"
 
-    async def connect(self, password: str, sync_token: str) -> str:
+    async def connect(self, password: str) -> str:
         """
         Connect to matrix server
         """
@@ -257,7 +267,7 @@ class MatrixClient:
             sync_filter = {"room": {"timeline": {"limit": 0}}}
             await self.client.sync(timeout=30000, full_state=True,
                                    sync_filter=sync_filter)
-            await self.sync_task(sync_token)
+            await self.sync_task()
 
             # close underlying http session
             await self.client.close()
@@ -269,7 +279,7 @@ class MatrixClient:
         Stop client
         """
 
-    def sync_token(self) -> str:
+    def _get_sync_token(self) -> str:
         """
         Get sync token of client connection
         """
@@ -414,6 +424,66 @@ class MatrixClient:
                 if isinstance(resp, RoomInviteError):
                     return str(resp)
         return ""
+
+    def _load_sync_token(self) -> str:
+        """
+        Load an old sync token from file if available
+        """
+
+        # make sure path and file exist
+        acc_id = self.account.aid
+        self.account.config.get_dir().mkdir(parents=True, exist_ok=True)
+        os.chmod(self.account.config.get_dir(), stat.S_IRWXU)
+        sync_token_file = self.account.config.get_dir() / f"sync_token{acc_id}"
+        if not sync_token_file.exists():
+            open(sync_token_file, "a").close()
+
+        # make sure only user can read/write file before using it
+        os.chmod(sync_token_file, stat.S_IRUSR | stat.S_IWUSR)
+
+        try:
+            with open(sync_token_file, "r") as token_file:
+                token = token_file.readline()
+        except OSError:
+            token = ""
+
+        return token
+
+    def _update_sync_token(self) -> None:
+        """
+        Update an existing sync token with a newer one
+        """
+
+        old = self.sync_token
+        new = self._get_sync_token()
+
+        # update sync token if necessary
+        if old == new:
+            return
+        self.sync_token = new
+
+        # update token file
+        acc_id = self.account.aid
+        sync_token_file = self.account.config.get_dir() / f"sync_token{acc_id}"
+
+        try:
+            with open(sync_token_file, "w") as token_file:
+                token_file.write(new)
+        except OSError:
+            return
+
+    def delete_sync_token(self) -> None:
+        """
+        Delete the sync token file for the account, called when account is
+        removed
+        """
+
+        acc_id = self.account.aid
+        sync_token_file = self.account.config.get_dir() / f"sync_token{acc_id}"
+        if not sync_token_file.exists():
+            return
+
+        os.remove(sync_token_file)
 
 
 def escape_name(name: str) -> str:

@@ -3,8 +3,6 @@ matrixd backend client
 """
 
 import asyncio
-import stat
-import os
 
 from typing import TYPE_CHECKING, Optional, Tuple
 from types import SimpleNamespace
@@ -41,9 +39,6 @@ class BackendClient:
         # is client active?
         self.active = True
 
-        # load sync token
-        self.sync_token = self.load_sync_token()
-
         # sync token and connection config
         self.settings = SimpleNamespace(
             # Send regular message to client for membership events?
@@ -63,8 +58,7 @@ class BackendClient:
                 # if client is offline, (re)connect
                 if self.client.status == "offline":
                     # start client connection
-                    await self.client.connect(self.account.password,
-                                              self.sync_token)
+                    await self.client.connect(self.account.password)
 
                 # stop, if client is inactive
                 if not self.active:
@@ -132,9 +126,6 @@ class BackendClient:
         if self.settings.membership_message_msg:
             self.account.receive_msg(formatted_msg)
 
-        # update sync token
-        self.update_sync_token()
-
     def _message(self, tstamp, sender, room_id, msg) -> None:
         """
         Message handler
@@ -144,9 +135,6 @@ class BackendClient:
         formatted_msg = Message.chat_msg(self.account, tstamp, sender, room_id,
                                          msg)
         self.account.receive_msg(formatted_msg)
-
-        # update sync token
-        self.update_sync_token()
 
     def muc_message(self, msg) -> None:
         """
@@ -201,9 +189,6 @@ class BackendClient:
             await self._chat_users(params[0])
         if cmd == Callback.CHAT_INVITE:
             await self._chat_invite(params[0], params[1])
-
-        # update sync token
-        self.update_sync_token()
 
     async def _send_message(self, message_tuple: Tuple) -> None:
         """
@@ -330,69 +315,9 @@ class BackendClient:
                                 invite.display_name, status)
             self.account.receive_msg(msg)
 
-    def load_sync_token(self) -> str:
-        """
-        Load an old sync token from file if available
-        """
-
-        # make sure path and file exist
-        acc_id = self.account.aid
-        self.account.config.get_dir().mkdir(parents=True, exist_ok=True)
-        os.chmod(self.account.config.get_dir(), stat.S_IRWXU)
-        sync_token_file = self.account.config.get_dir() / f"sync_token{acc_id}"
-        if not sync_token_file.exists():
-            open(sync_token_file, "a").close()
-
-        # make sure only user can read/write file before using it
-        os.chmod(sync_token_file, stat.S_IRUSR | stat.S_IWUSR)
-
-        try:
-            with open(sync_token_file, "r") as token_file:
-                token = token_file.readline()
-        except OSError:
-            token = ""
-
-        return token
-
-    def update_sync_token(self) -> None:
-        """
-        Update an existing sync token with a newer one
-        """
-
-        old = self.sync_token
-        new = self.client.sync_token()
-
-        # update sync token if necessary
-        if old == new:
-            return
-        self.sync_token = new
-
-        # update token file
-        acc_id = self.account.aid
-        sync_token_file = self.account.config.get_dir() / f"sync_token{acc_id}"
-
-        try:
-            with open(sync_token_file, "w") as token_file:
-                token_file.write(new)
-        except OSError:
-            return
-
-    def delete_sync_token(self) -> None:
-        """
-        Delete the sync token file for the account, called when account is
-        removed
-        """
-
-        acc_id = self.account.aid
-        sync_token_file = self.account.config.get_dir() / f"sync_token{acc_id}"
-        if not sync_token_file.exists():
-            return
-
-        os.remove(sync_token_file)
-
     def del_account(self):
         """
         Cleanup after account deletion
         """
 
-        self.delete_sync_token()
+        self.client.delete_sync_token()
