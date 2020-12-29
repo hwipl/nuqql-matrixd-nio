@@ -14,7 +14,7 @@ from nuqql_based.message import Message
 from nuqql_based.callback import Callback
 
 # matrixd import
-from nuqql_matrixd_nio.matrix import (MatrixClient, parse_account_user,
+from nuqql_matrixd_nio.matrix import (MatrixClient,
                                       escape_name)
 
 if TYPE_CHECKING:   # imports for typing
@@ -30,12 +30,6 @@ class BackendClient:
     def __init__(self, account: "Account") -> None:
         # account
         self.account = account
-
-        # parse user to get url and username
-        _url, user, domain = parse_account_user(account.user)
-
-        # construct matrix user name with user and domain name
-        self.user = "@{}:{}".format(user, domain)
 
         # initialize matrix client connection
         self.client = MatrixClient(account,
@@ -250,7 +244,7 @@ class BackendClient:
         for room in rooms.values():
             self.account.receive_msg(Message.chat_list(
                 self.account, room.room_id, escape_name(room.display_name),
-                self.user))
+                self.client.get_user()))
 
     async def _chat_create(self, name: str) -> None:
         """
