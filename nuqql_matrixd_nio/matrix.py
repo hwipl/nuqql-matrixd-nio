@@ -56,9 +56,6 @@ class MatrixClient:
     def __init__(self, account: "Account",
                  handlers: Tuple[Callable, ...]) -> None:
         self.account = account
-        _url, user, domain = parse_account_user(account.user)
-        username = "@{}:{}".format(user, domain)
-        self.user = username
         store_path = self.get_path() + STORE_DIR_SUFFIX
         if not os.path.isdir(store_path):
             os.mkdir(store_path)
@@ -66,7 +63,7 @@ class MatrixClient:
             store_sync_tokens=True,
             encryption_enabled=True,
         )
-        self.client = AsyncClient(self.get_url(), username,
+        self.client = AsyncClient(self.get_url(), self.get_user(),
                                   store_path=store_path,
                                   config=config,
                                   )
@@ -111,7 +108,8 @@ class MatrixClient:
         """
 
         # if filter own is set, skip own messages
-        if self.account.config.get_filter_own() and event.sender == self.user:
+        if self.account.config.get_filter_own() and \
+           event.sender == self.get_user():
             if event.transaction_id:
                 # only events from this client/device have a transaction ID;
                 # only filter these messages, so we still get our own messages
@@ -120,7 +118,7 @@ class MatrixClient:
 
         # rewrite sender of own messages
         sender = event.sender
-        if event.sender == self.user:
+        if event.sender == self.get_user():
             sender = "<self>"
 
         # all (e2ee) media
