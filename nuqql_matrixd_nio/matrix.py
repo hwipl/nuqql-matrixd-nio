@@ -56,7 +56,7 @@ class MatrixClient:
     def __init__(self, account: "Account",
                  handlers: Tuple[Callable, ...]) -> None:
         self.account = account
-        url, user, domain = parse_account_user(account.user)
+        _url, user, domain = parse_account_user(account.user)
         username = "@{}:{}".format(user, domain)
         self.user = username
         store_path = self.get_path() + STORE_DIR_SUFFIX
@@ -66,7 +66,7 @@ class MatrixClient:
             store_sync_tokens=True,
             encryption_enabled=True,
         )
-        self.client = AsyncClient(url, username,
+        self.client = AsyncClient(self.get_url(), username,
                                   store_path=store_path,
                                   config=config,
                                   )
@@ -78,6 +78,14 @@ class MatrixClient:
         message_handler, membership_handler = handlers
         self.message_handler = message_handler
         self.membership_handler = membership_handler
+
+    def get_url(self) -> str:
+        """
+        Get matrix server url
+        """
+
+        url, _user, _domain = parse_account_user(self.account.user)
+        return url
 
     def get_path(self) -> str:
         """
@@ -168,12 +176,11 @@ class MatrixClient:
         save credentials like access token to disk for later logins
         """
 
-        url, _user, _domain = parse_account_user(self.account.user)
         # open the config file in write-mode
         with open(self.get_path() + CREDENTIALS_FILE_SUFFIX, "w") as cred_file:
             # write the login details to disk
             json.dump({
-                "homeserver": url,  # e.g. "https://matrix.example.org"
+                "homeserver": self.get_url(),  # e.g. "https://matrix.x.org"
                 "user_id": user_id,  # e.g. "@user:example.org"
                 "device_id": device_id,  # device ID, 10 uppercase letters
                 "access_token": access_token  # cryptogr. access token
