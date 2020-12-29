@@ -79,6 +79,15 @@ class MatrixClient:
         self.message_handler = message_handler
         self.membership_handler = membership_handler
 
+    def get_user(self) -> str:
+        """
+        Get matrix user id
+        """
+
+        _url, user, domain = parse_account_user(self.account.user)
+        username = "@{}:{}".format(user, domain)
+        return username
+
     def get_url(self) -> str:
         """
         Get matrix server url
