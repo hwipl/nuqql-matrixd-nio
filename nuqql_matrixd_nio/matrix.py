@@ -57,7 +57,7 @@ class MatrixClient:
     def __init__(self, account: "Account",
                  handlers: Tuple[Callable, ...]) -> None:
         self.account = account
-        store_path = self.get_path() + STORE_DIR_SUFFIX
+        store_path = self._get_path() + STORE_DIR_SUFFIX
         if not os.path.isdir(store_path):
             os.mkdir(store_path)
         config = AsyncClientConfig(
@@ -97,7 +97,7 @@ class MatrixClient:
         url, _user, _domain = parse_account_user(self.account.user)
         return url
 
-    def get_path(self) -> str:
+    def _get_path(self) -> str:
         """
         Get working directory from config
         """
@@ -194,7 +194,8 @@ class MatrixClient:
         """
 
         # open the config file in write-mode
-        with open(self.get_path() + CREDENTIALS_FILE_SUFFIX, "w") as cred_file:
+        path = self._get_path() + CREDENTIALS_FILE_SUFFIX
+        with open(path, "w") as cred_file:
             # write the login details to disk
             json.dump({
                 "homeserver": self.get_url(),  # e.g. "https://matrix.x.org"
@@ -208,7 +209,7 @@ class MatrixClient:
         read previously saved credentials from disk
         """
 
-        credentials_file = self.get_path() + CREDENTIALS_FILE_SUFFIX
+        credentials_file = self._get_path() + CREDENTIALS_FILE_SUFFIX
         if os.path.exists(credentials_file):
             with open(credentials_file, "r") as cred_file:
                 creds = json.load(cred_file)
