@@ -32,14 +32,13 @@ class BackendClient:
         self.account = account
 
         # parse user to get url and username
-        url, user, domain = parse_account_user(account.user)
+        _url, user, domain = parse_account_user(account.user)
 
         # construct matrix user name with user and domain name
         self.user = "@{}:{}".format(user, domain)
 
         # initialize matrix client connection
-        path = str(self.account.config.get_dir() / f"account{account.aid}")
-        self.client = MatrixClient(url, self.user, path,
+        self.client = MatrixClient(account,
                                    (self._message, self._membership_event))
 
         # client task

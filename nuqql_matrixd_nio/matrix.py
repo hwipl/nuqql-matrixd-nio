@@ -7,7 +7,7 @@ import logging
 import os
 import urllib.parse
 
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple, TYPE_CHECKING
 
 from nio import (  # type: ignore
     AsyncClient,
@@ -40,6 +40,9 @@ from nio import (  # type: ignore
     RoomMessageVideo,
 )
 
+if TYPE_CHECKING:   # imports for typing
+    from nuqql_based.account import Account  # noqa
+
 # file/directory name settings
 STORE_DIR_SUFFIX = "_store"
 CREDENTIALS_FILE_SUFFIX = "_credentials.json"
@@ -53,12 +56,16 @@ class MatrixClient:
     Matrix client class
     """
 
-    def __init__(self, url: str, username: str, path: str,
+    def __init__(self, account: "Account",
                  handlers: Tuple[Callable, ...]) -> None:
+        self.account = account
+        url, user, domain = parse_account_user(account.user)
         self.url = url
+        username = "@{}:{}".format(user, domain)
         self.user = username
-        self.path = path
-        store_path = path + STORE_DIR_SUFFIX
+        self.path = str(self.account.config.get_dir() /
+                        f"account{account.aid}")
+        store_path = self.path + STORE_DIR_SUFFIX
         if not os.path.isdir(store_path):
             os.mkdir(store_path)
         config = AsyncClientConfig(
