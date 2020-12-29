@@ -64,7 +64,7 @@ class MatrixClient:
             store_sync_tokens=True,
             encryption_enabled=True,
         )
-        self.client = AsyncClient(self.get_url(), self.get_user(),
+        self.client = AsyncClient(self._get_url(), self.get_user(),
                                   store_path=store_path,
                                   config=config,
                                   )
@@ -89,7 +89,7 @@ class MatrixClient:
         username = "@{}:{}".format(user, domain)
         return username
 
-    def get_url(self) -> str:
+    def _get_url(self) -> str:
         """
         Get matrix server url
         """
@@ -198,7 +198,7 @@ class MatrixClient:
         with open(path, "w") as cred_file:
             # write the login details to disk
             json.dump({
-                "homeserver": self.get_url(),  # e.g. "https://matrix.x.org"
+                "homeserver": self._get_url(),  # e.g. "https://matrix.x.org"
                 "user_id": user_id,  # e.g. "@user:example.org"
                 "device_id": device_id,  # device ID, 10 uppercase letters
                 "access_token": access_token  # cryptogr. access token
