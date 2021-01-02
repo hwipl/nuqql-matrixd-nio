@@ -82,7 +82,8 @@ optional arguments:
 ## Changes
 
 * devel:
-  * Update nuqql-based, switch to asyncio, require python version >= 3.7.
+  * Update nuqql-based to v0.3.0, switch to asyncio, require python
+    version >= 3.7.
   * Add welcome and account adding help messages.
   * Disable filtering of own messages, rewrite sender of own messages to
     `<self>`
