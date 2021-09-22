@@ -102,8 +102,7 @@ class BackendServer:
         # nuqql sends a html-escaped message; construct "plain-text" version
         # and xhtml version using nuqql's message and use them as message body
         # later
-        html_msg = \
-            '<body xmlns="http://www.w3.org/1999/xhtml">{}</body>'.format(msg)
+        html_msg = f'<body xmlns="http://www.w3.org/1999/xhtml">{msg}</body>'
         msg = html.unescape(msg)
         msg = "\n".join(re.split("<br/>", msg, flags=re.IGNORECASE))
 
