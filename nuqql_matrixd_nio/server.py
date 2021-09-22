@@ -164,7 +164,8 @@ class BackendServer:
 
         return ""
 
-    async def _help_account_add(self, _account: Optional["Account"],
+    @staticmethod
+    async def _help_account_add(_account: Optional["Account"],
                                 _cmd: Callback, _params: Tuple) -> str:
         """
         Handle account add help event
