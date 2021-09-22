@@ -437,7 +437,8 @@ class MatrixClient:
         os.chmod(self.account.config.get_dir(), stat.S_IRWXU)
         sync_token_file = self.account.config.get_dir() / f"sync_token{acc_id}"
         if not sync_token_file.exists():
-            open(sync_token_file, "a", encoding='UTF-8').close()
+            with open(sync_token_file, "a", encoding='UTF-8'):
+                pass
 
         # make sure only user can read/write file before using it
         os.chmod(sync_token_file, stat.S_IRUSR | stat.S_IWUSR)
