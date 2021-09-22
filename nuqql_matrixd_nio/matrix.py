@@ -86,7 +86,7 @@ class MatrixClient:
         """
 
         _url, user, domain = parse_account_user(self.account.user)
-        username = "@{}:{}".format(user, domain)
+        username = f"@{user}:{domain}"
         return username
 
     def _get_url(self) -> str:
