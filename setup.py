@@ -12,7 +12,7 @@ from setuptools import setup
 
 # setup parameters
 DESCRIPTION = "Matrix client network daemon using matrix-nio"
-with open("README.md", 'r') as f:
+with open("README.md", 'r', encoding='UTF-8') as f:
     LONG_DESCRIPTION = f.read()
 CLASSIFIERS = [
     "Programming Language :: Python :: 3",
