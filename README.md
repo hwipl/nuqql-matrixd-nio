@@ -81,7 +81,7 @@ optional arguments:
 
 ## Changes
 
-* devel:
+* v0.3.0:
   * Update matrix-nio to v0.19.0
 * v0.2.0:
   * Update nuqql-based to v0.3.0, switch to asyncio, require python
