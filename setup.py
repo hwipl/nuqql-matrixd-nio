@@ -61,5 +61,5 @@ setup(
     },
     classifiers=CLASSIFIERS,
     python_requires='>=3.7',
-    install_requires=["nuqql-based~=0.3.0", "matrix-nio[e2e]~=0.19.0"],
+    install_requires=["nuqql-based~=0.3.0", "matrix-nio[e2e]~=0.20.0"],
 )
