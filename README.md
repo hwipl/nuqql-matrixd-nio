@@ -81,7 +81,7 @@ optional arguments:
 
 ## Changes
 
-* devel:
+* v0.3.3:
   * Update matrix-nio to v0.21.2
 * v0.3.2:
   * Update matrix-nio to v0.20.1
