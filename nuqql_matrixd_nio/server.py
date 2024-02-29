@@ -23,7 +23,7 @@ if TYPE_CHECKING:   # imports for typing
 
 
 # matrixd version
-VERSION = "0.3.3"
+VERSION = "0.3.4"
 
 
 class BackendServer:
