@@ -152,6 +152,9 @@ class MatrixClient:
                     " ***"
         elif isinstance(event, (RoomEncryptedVideo, RoomMessageVideo)):
             msg = "*** posted video: " + event.body + msg_url + " ***"
+        else:
+            # unhandled message
+            return
 
         # save timestamp and message in messages list and history
         tstamp = str(int(event.server_timestamp/1000))
