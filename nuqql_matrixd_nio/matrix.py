@@ -13,6 +13,10 @@ from typing import Callable, Dict, List, Tuple, TYPE_CHECKING
 from nio import (  # type: ignore
     AsyncClient,
     AsyncClientConfig,
+    CallAnswerEvent,
+    CallEvent,
+    CallHangupEvent,
+    CallInviteEvent,
     JoinError,
     JoinedMembersResponse,
     LocalProtocolError,
@@ -70,6 +74,7 @@ class MatrixClient:
                                   )
         self.client.add_event_callback(self.message_callback, RoomMessage)
         self.client.add_event_callback(self.member_callback, RoomMemberEvent)
+        self.client.add_event_callback(self.call_callback, CallEvent)
         self.status = "offline"
 
         # handlers
@@ -189,6 +194,43 @@ class MatrixClient:
         self.membership_handler(event.membership, tstamp, event.sender,
                                 display_name, room.room_id, room.display_name,
                                 invited_user)
+
+    async def call_callback(self, room: MatrixRoom, event: CallEvent) -> None:
+        """
+        Call event handler
+        """
+
+        # update sync token
+        self._update_sync_token()
+
+        # if filter own is set, skip own messages
+        if self.account.config.get_filter_own() and \
+           event.sender == self.get_user():
+            if event.transaction_id:
+                # only events from this client/device have a transaction ID;
+                # only filter these messages, so we still get our own messages
+                # from our other devices
+                return
+
+        # rewrite sender of own messages
+        sender = event.sender
+        if event.sender == self.get_user():
+            sender = "<self>"
+
+        # call event types
+        if isinstance(event, CallInviteEvent):
+            msg = "*** invited to call " + event.call_id + " ***"
+        elif isinstance(event, CallAnswerEvent):
+            msg = "*** answered call " + event.call_id + " ***"
+        elif isinstance(event, CallHangupEvent):
+            msg = "*** hung up call " + event.call_id + "***"
+        else:
+            # unhandled message
+            return
+
+        # save timestamp and message in messages list and history
+        tstamp = str(int(event.server_timestamp/1000))
+        self.message_handler(tstamp, sender, room.machine_name, msg)
 
     def save_credentials(self, user_id: str, device_id: str,
                          access_token: str) -> None:
