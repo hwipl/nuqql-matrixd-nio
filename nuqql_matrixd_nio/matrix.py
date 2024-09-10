@@ -223,7 +223,7 @@ class MatrixClient:
         elif isinstance(event, CallAnswerEvent):
             msg = "*** answered call " + event.call_id + " ***"
         elif isinstance(event, CallHangupEvent):
-            msg = "*** hung up call " + event.call_id + "***"
+            msg = "*** hung up call " + event.call_id + " ***"
         else:
             # unhandled message
             return
