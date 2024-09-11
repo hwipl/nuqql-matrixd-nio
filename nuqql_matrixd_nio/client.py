@@ -95,7 +95,7 @@ class BackendClient:
         """
 
         # parse params
-        event_type, tstamp, sender_id, sender_name, room_id, room_name,\
+        event_type, tstamp, sender_id, sender_name, room_id, room_name, \
             invited_user = params
 
         # check membership type
@@ -105,15 +105,18 @@ class BackendClient:
             msg = (f"*** {sender_name} invited {invited_user} "
                    f"to {room_name}. ***")
 
-        if event_type == "join":
+        elif event_type == "join":
             user_msg = Message.chat_user(self.account, room_id, sender_id,
                                          invited_user, event_type)
             msg = f"*** {invited_user} joined {room_name}. ***"
 
-        if event_type == "leave":
+        elif event_type == "leave":
             user_msg = Message.chat_user(self.account, room_id, sender_id,
                                          sender_name, event_type)
             msg = f"*** {sender_name} left {room_name}. ***"
+
+        else:
+            return
 
         # generic event, return as message
         # TODO: change parsing in nuqql and use char + / + sender here?
