@@ -81,6 +81,9 @@ optional arguments:
 
 ## Changes
 
+* devel:
+  * Update matrix-nio to v0.25.2
+  * Show call events
 * v0.3.4:
   * Update matrix-nio to v0.24.0
 * v0.3.3:
